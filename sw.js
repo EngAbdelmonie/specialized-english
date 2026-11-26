@@ -2,7 +2,7 @@
 // PWA: تخزين هيكل التطبيق للعمل دون اتصال + إشعارات التذكير عبر registration.showNotification.
 // لا يوجد خادم دفع (Push Server) — لا إشعارات والمتصفح مغلق تمامًا.
 // طلبات Gemini والمحتوى الحي (قاموس/BBC/YouTube) لا تُخزَّن أبدًا — تمر مباشرة للشبكة.
-var CACHE = 'esp-pwa-v2';
+var CACHE = 'esp-pwa-v3';
 var CORE = [
   './',
   './index.html',
