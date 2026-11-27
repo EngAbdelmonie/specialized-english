@@ -12,16 +12,95 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="إنجليزي تخصصي">
-<style>*{box-sizing:border-box;}html{overflow-x:clip;}body{overflow-x:clip;margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:#ffffff;color:#000;font-size:21px;line-height:1.7;}header{background:#0b3d66;color:#fff;padding:16px;text-align:center;}header h1{margin:0;font-size:30px;}header p{margin:4px 0 0;font-size:18px;opacity:.92;}main{max-width:860px;margin:0 auto;padding:16px;}.en{direction:ltr;unicode-bidi:embed;font-family:Georgia,"Times New Roman",serif;}.card{border:2px solid #0b3d66;border-radius:14px;padding:16px;margin:12px 0;background:#f7fafc;}.card h3{margin:0 0 6px;font-size:25px;}button{font-family:inherit;font-size:21px;padding:12px 20px;border-radius:12px;border:2px solid #0b3d66;background:#0b3d66;color:#fff;cursor:pointer;margin:5px 3px;}button.alt{background:#fff;color:#0b3d66;}button.ghost{background:#eef4f8;color:#0b3d66;border-color:#9db8cc;}button:disabled{opacity:.45;cursor:default;}button.big{width:100%;font-size:24px;padding:16px;}.grid{display:grid;grid-template-columns:1fr;gap:12px;}.grid>*{min-width:0;}.card{min-width:0;}@media (min-width:640px){.grid{grid-template-columns:1fr 1fr;}}.sec-card{text-align:right;}.sec-card .icon{font-size:40px;}.line{border-right:5px solid #0b3d66;background:#fff;padding:10px 14px;margin:10px 0;border-radius:8px;}.line .who{font-weight:bold;color:#0b3d66;}.hidden-text{filter:blur(7px);user-select:none;}.fb{border-radius:10px;padding:12px 14px;margin:10px 0;font-weight:bold;}.fb.ok{background:#e2f4e2;border:2px solid #2e7d32;}.fb.bad{background:#fde8e8;border:2px solid #b3261e;}.fb.mid{background:#fff6da;border:2px solid #a67c00;}.opt{display:block;width:100%;text-align:right;background:#fff;color:#000;border:2px solid #9db8cc;}.opt.sel-ok{border-color:#2e7d32;background:#e2f4e2;}.opt.sel-bad{border-color:#b3261e;background:#fde8e8;}.chip{display:inline-block;background:#eef4f8;border:2px solid #0b3d66;color:#0b3d66;border-radius:20px;padding:6px 16px;margin:4px;cursor:pointer;font-size:22px;}.chip.used{opacity:.3;pointer-events:none;}.built{min-height:56px;border:2px dashed #0b3d66;border-radius:10px;padding:8px;margin:8px 0;background:#fff;}select{font-size:20px;padding:8px;border-radius:8px;border:2px solid #0b3d66;font-family:inherit;max-width:100%;}#vsVoice{width:100%;}.muted{color:#444;font-size:18px;}.score{font-size:26px;font-weight:bold;text-align:center;}.prog{background:#e3ecf2;border-radius:10px;height:18px;overflow:hidden;margin:8px 0;}.prog>div{background:#2e7d32;height:100%;}table{width:100%;border-collapse:collapse;font-size:19px;}td,th{border:1px solid #b9cdd9;padding:8px;vertical-align:top;overflow-wrap:break-word;}th{background:#eef4f8;}.note{background:#fff6da;border:2px solid #a67c00;border-radius:10px;padding:10px 14px;}.center{text-align:center;}.mic-on{background:#b3261e !important;border-color:#b3261e !important;}.bub{border-radius:12px;padding:10px 14px;margin:8px 0;max-width:92%;}.bubBot{background:#eef4f8;border:2px solid #9db8cc;margin-left:auto;}.bubMe{background:#e2f4e2;border:2px solid #2e7d32;margin-right:auto;}.bubNote{background:#fff6da;border:2px solid #a67c00;max-width:100%;}.chatlog{padding:4px 0;}.txtin{font-family:inherit;font-size:20px;padding:12px;border-radius:10px;border:2px solid #0b3d66;flex:1;min-width:220px;width:100%;}textarea.txtin{flex:none;}.taskrow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:2px solid #b9cdd9;border-radius:10px;padding:8px 12px;margin:6px 0;flex-wrap:wrap;}.vidwrap{position:relative;padding-top:56.25%;}.vidwrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:10px;}audio{max-width:100%;}input[type=range]{width:100%;accent-color:#0b3d66;height:38px;cursor:pointer;}#repBar{position:fixed;right:0;left:0;bottom:0;z-index:9998;background:#0b3d66;color:#fff;padding:6px 8px;box-shadow:0 -3px 14px rgba(0,0,0,.35);display:flex;align-items:center;gap:6px;flex-wrap:nowrap;font-size:15px;height:52px;box-sizing:border-box;}#repBar #repText{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:bold;}#repBar #repCount{white-space:nowrap;font-size:13px;font-weight:bold;}#repPop{position:fixed;right:8px;bottom:60px;z-index:9999;background:#0b3d66;color:#fff;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:12px 14px;display:none;width:min(92vw,320px);box-sizing:border-box;font-size:15px;}#repPop.open{display:block;}#repPop .rrow{display:flex;align-items:center;gap:6px;margin:9px 0;flex-wrap:wrap;}#repPop button{font-size:15px;padding:5px 10px;margin:0;background:#fff;color:#0b3d66;border:2px solid #fff;border-radius:9px;cursor:pointer;}#repPop select{font-size:15px;padding:5px;border-radius:8px;max-width:100%;}#repBarShow{position:fixed;left:10px;bottom:12px;z-index:9998;background:#0b3d66;color:#fff;border:2px solid #fff;border-radius:999px;padding:7px 14px;font-size:15px;font-weight:bold;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;}#repBar button{font-size:15px;padding:5px 10px;margin:0;background:#fff;color:#0b3d66;border:2px solid #fff;border-radius:9px;cursor:pointer;white-space:nowrap;flex:0 0 auto;}#repBar button.stop{background:#b3261e;border-color:#b3261e;color:#fff;font-weight:bold;}#repBar select{font-size:17px;padding:5px;border-radius:8px;}body{padding-bottom:68px;}@media (min-width:1024px){body{padding-bottom:64px;}main{max-width:1180px;padding:22px 28px;}.grid{grid-template-columns:1fr 1fr 1fr;}.desk2{display:flex;gap:18px;align-items:flex-start;}.desk2-side{flex:0 0 350px;position:sticky;top:14px;max-height:calc(100vh - 30px);overflow:auto;}.desk2-main{flex:1;min-width:0;}.bub{max-width:76%;}.chatlog{max-width:940px;margin:0 auto;}.card.voiceset{grid-column:span 2;}button{padding:13px 24px;}.opt{padding:14px;}}@media (min-width:1440px){main{max-width:1340px;}}
+<style>
+:root{--navy:#0B3D66;--navy2:#0E4A7A;--ink:#16283A;--mut:#5A6B7A;--bg:#F4F7FA;--card:#FFFFFF;--line:#DFE8EF;--line2:#E8EFF4;--grn:#1E7D46;--grnD:#155C33;--red:#B3261E;--gold:#A67C00;--rad:18px;--sh:0 1px 3px rgba(11,61,102,.06)}
+*{box-sizing:border-box}
+html{overflow-x:clip}
+body{overflow-x:clip;margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:20px;line-height:1.65;padding-bottom:132px}
+header{background:linear-gradient(180deg,var(--navy),var(--navy2));color:#fff;padding:12px 16px;text-align:center;box-shadow:0 2px 10px rgba(11,61,102,.18)}
+header h1{margin:0;font-size:23px;font-weight:800}
+header p{margin:2px 0 0;font-size:14px;opacity:.85}
+main{max-width:920px;margin:0 auto;padding:16px 14px 8px}
+.en{direction:ltr;unicode-bidi:embed;font-family:Georgia,"Times New Roman",serif}
+h2{font-size:24px;color:var(--navy);margin:20px 2px 10px}
+h3{font-size:21px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:16px;margin:12px 0;box-shadow:var(--sh)}
+.card h3{margin:0 0 6px;font-size:22px;color:var(--navy)}
+button{font-family:inherit;font-size:20px;padding:12px 20px;border-radius:14px;border:2px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;margin:5px 3px;min-height:52px}
+button:active{transform:translateY(1px)}
+button.alt{background:#fff;color:var(--navy)}
+button.ghost{background:#EEF4F8;color:var(--navy);border-color:#C7D8E4}
+button:disabled{opacity:.45;cursor:default}
+button.big{width:100%;font-size:22px;padding:16px;border-radius:16px;font-weight:bold}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.grid>*{min-width:0}
+.card{min-width:0}
+@media (min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+.sec-card{text-align:right}
+.sec-card .icon{font-size:38px}
+.line{border-right:4px solid var(--navy);background:#fff;padding:10px 14px;margin:10px 0;border-radius:10px;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);border-left:1px solid var(--line2)}
+.line .who{font-weight:bold;color:var(--navy)}
+.hidden-text{filter:blur(7px);user-select:none}
+.fb{border-radius:12px;padding:12px 14px;margin:10px 0;font-weight:bold}
+.fb.ok{background:#E4F4E9;border:1.5px solid var(--grn)}
+.fb.bad{background:#FDECEA;border:1.5px solid var(--red)}
+.fb.mid{background:#FFF6DA;border:1.5px solid var(--gold)}
+.opt{display:block;width:100%;text-align:right;background:#fff;color:var(--ink);border:1.5px solid #C7D8E4;border-radius:14px;padding:14px 16px;margin:7px 0}
+.opt.sel-ok{border-color:var(--grn);background:#E4F4E9}
+.opt.sel-bad{border-color:var(--red);background:#FDECEA}
+.chip{display:inline-block;background:#EEF4F8;border:1.5px solid #C7D8E4;color:var(--navy);border-radius:999px;padding:6px 15px;margin:4px;cursor:pointer;font-size:19px}
+.chip.used{opacity:.3;pointer-events:none}
+.built{min-height:56px;border:2px dashed #9DB8CC;border-radius:12px;padding:8px;margin:8px 0;background:#fff}
+select{font-size:19px;padding:9px;border-radius:10px;border:1.5px solid #C7D8E4;font-family:inherit;max-width:100%;background:#fff}
+#vsVoice{width:100%}
+.muted{color:var(--mut);font-size:17px}
+.score{font-size:25px;font-weight:bold;text-align:center}
+.prog{background:#E3ECF2;border-radius:99px;height:10px;overflow:hidden;margin:8px 0}
+.prog>div{background:var(--grn);height:100%;border-radius:99px}
+table{width:100%;border-collapse:collapse;font-size:18px}
+td,th{border:1px solid #C9D9E4;padding:8px;vertical-align:top;overflow-wrap:break-word}
+th{background:#EEF4F8}
+.note{background:#FFF8E1;border:1px solid #E4C95C;border-radius:14px;padding:12px 15px}
+.center{text-align:center}
+.mic-on{background:var(--red) !important;border-color:var(--red) !important}
+.bub{border-radius:14px;padding:10px 14px;margin:8px 0;max-width:92%}
+.bubBot{background:#EEF4F8;border:1.5px solid #C7D8E4;margin-left:auto}
+.bubMe{background:#E4F4E9;border:1.5px solid var(--grn);margin-right:auto}
+.bubNote{background:#FFF6DA;border:1.5px solid var(--gold);max-width:100%}
+.chatlog{padding:4px 0}
+.txtin{font-family:inherit;font-size:20px;padding:12px;border-radius:12px;border:1.5px solid #C7D8E4;flex:1;min-width:220px;width:100%;background:#fff}
+textarea.txtin{flex:none}
+.taskrow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid var(--line2);border-radius:12px;padding:9px 13px;margin:6px 0;flex-wrap:wrap;font-size:18px}
+.taskrow button{margin:0;padding:7px 16px;min-height:42px;font-size:17px}
+.vidwrap{position:relative;padding-top:56.25%}
+.vidwrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:12px}
+audio{max-width:100%}
+input[type=range]{width:100%;accent-color:var(--navy);height:38px;cursor:pointer}
+#repBar{position:fixed;right:0;left:0;bottom:0;z-index:9998;background:var(--navy);color:#fff;padding:6px 8px;box-shadow:0 -3px 14px rgba(11,61,102,.35);display:flex;align-items:center;gap:6px;flex-wrap:nowrap;font-size:15px;height:52px;box-sizing:border-box}
+#repBar #repText{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:bold}
+#repBar #repCount{white-space:nowrap;font-size:13px;font-weight:bold}
+#repPop{position:fixed;right:8px;bottom:120px;z-index:9999;background:var(--navy);color:#fff;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.4);padding:12px 14px;display:none;width:min(92vw,320px);box-sizing:border-box;font-size:15px}
+#repPop.open{display:block}
+#repPop .rrow{display:flex;align-items:center;gap:6px;margin:9px 0;flex-wrap:wrap}
+#repPop button{font-size:15px;padding:5px 10px;margin:0;background:#fff;color:var(--navy);border:2px solid #fff;border-radius:9px;cursor:pointer;min-height:0}
+#repPop select{font-size:15px;padding:5px;border-radius:8px;max-width:100%}
+#repBarShow{position:fixed;left:10px;bottom:70px;z-index:9998;background:var(--navy);color:#fff;border:2px solid #fff;border-radius:999px;padding:7px 14px;font-size:15px;font-weight:bold;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;min-height:0}
+#repBar button{font-size:15px;padding:5px 10px;margin:0;background:#fff;color:var(--navy);border:2px solid #fff;border-radius:9px;cursor:pointer;white-space:nowrap;flex:0 0 auto;min-height:0}
+#repBar button.stop{background:var(--red);border-color:var(--red);color:#fff;font-weight:bold}
+#repBar select{font-size:16px;padding:5px;border-radius:8px}
+.desk2{display:block}
+.desk2-side{display:block}
+.desk2-main{display:block;min-width:0}
+@media (min-width:1024px){main{padding:20px 22px}.bub{max-width:76%}.chatlog{max-width:940px;margin:0 auto}.card.voiceset{grid-column:span 2}button{padding:13px 24px}.opt{padding:15px}}
 .flipwrap{perspective:900px;max-width:420px;margin:14px auto;cursor:pointer}
 .flipinner{position:relative;width:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
 .flipinner.flipped{transform:rotateY(180deg)}
-.flipface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #0b3d66;border-radius:14px;background:#eef4f8;padding:16px;text-align:center;overflow-wrap:break-word}
-.flipback{transform:rotateY(180deg);background:#e2f4e2}
-.chipbtn{background:#fff;color:#0b3d66;font-family:Georgia,"Times New Roman",serif}
+.flipface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid #C7D8E4;border-radius:16px;background:#EEF4F8;padding:16px;text-align:center;overflow-wrap:break-word}
+.flipback{transform:rotateY(180deg);background:#E4F4E9}
+.chipbtn{background:#fff;color:var(--navy);font-family:Georgia,"Times New Roman",serif}
 .matchgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.matchcard{background:#fff;color:#000;border:2px solid #0b3d66;border-radius:12px;min-height:74px;font-size:19px;padding:8px;overflow-wrap:break-word}
-.matchcard.sel{background:#fff6da;border-color:#a67c00}
+.matchcard{background:#fff;color:var(--ink);border:1.5px solid #C7D8E4;border-radius:14px;min-height:74px;font-size:19px;padding:8px;overflow-wrap:break-word}
+.matchcard.sel{background:#FFF6DA;border-color:var(--gold)}
 .matchcard.gone{visibility:hidden}
 @media (max-width:480px){.matchgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
@@ -959,6 +1038,213 @@ function injectBtn(){
 }
 try{ if(typeof window.goHome==='function'){ var _ghU=window.goHome; window.goHome=function(){ var r=_ghU.apply(this,arguments); injectBtn(); return r; }; } }catch(e){}
 injectBtn();
+})();
+</script>
+
+<style>
+/* ===== طبقة إعادة التصميم الاحترافية (v11) — تجاوزات على أنماط الإضافات القديمة ===== */
+.xpbar{background:#E3ECF2 !important;border-radius:99px !important;height:10px !important;overflow:hidden}
+.xpbar>div{background:#1E7D46 !important;height:100%;border-radius:99px}
+.stat{display:inline-block;background:#EEF4F8;border-radius:999px;padding:5px 13px;margin:3px;font-weight:bold;font-size:16px;color:#0B3D66}
+.ladder{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.rung{flex:1;min-width:96px;text-align:center;border:1px solid #DFE8EF;border-radius:14px;padding:10px 4px;background:#fff;color:#5A6B7A}
+.rung.cur{border-color:#0B3D66;background:#EAF2F8;color:#0B3D66;font-weight:bold}
+.rung.done{border-color:#1E7D46;color:#155C33}
+.unit{display:flex;gap:9px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #EDF2F6;font-size:19px}
+.unit:last-child{border-bottom:none}
+/* ===== مكونات الواجهة الجديدة ===== */
+.uititle{font-size:26px;color:#0B3D66;margin:6px 2px 12px}
+.uih2{font-size:21px;color:#0B3D66;margin:20px 2px 8px}
+.uichips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.uichip{background:#EEF4F8;color:#0B3D66;border-radius:999px;padding:5px 13px;font-size:16px;font-weight:bold}
+.uicta{width:100%;background:#0B3D66;color:#fff;border:none;border-radius:16px;padding:16px;font-size:22px;font-weight:bold;cursor:pointer;box-shadow:0 4px 14px rgba(11,61,102,.22);margin:4px 0 2px;min-height:60px}
+.uicta small{display:block;font-size:15px;font-weight:normal;opacity:.88;margin-top:3px}
+.trkrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #DFE8EF;border-radius:16px;padding:13px 15px;margin:9px 0;box-shadow:0 1px 3px rgba(11,61,102,.05)}
+.trkrow .tic{font-size:30px;line-height:1}
+.trkrow .tgrow{flex:1;min-width:0}
+.trkrow b{font-size:20px;color:#16283A}
+.trkrow small{display:block;color:#5A6B7A;font-size:15px}
+.trkrow .tbar{background:#E3ECF2;border-radius:99px;height:9px;margin-top:7px;overflow:hidden}
+.trkrow .tbar div{background:#1E7D46;height:100%;border-radius:99px}
+.trkrow .tbtns{display:flex;flex-direction:column;gap:6px}
+.trkrow .tbtns button{margin:0;padding:8px 13px;min-height:44px;font-size:16px;border-radius:11px;white-space:nowrap}
+.statrow{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #DFE8EF;border-radius:14px;padding:12px 15px;margin:8px 0;font-size:18px;width:100%;text-align:right;color:#16283A;cursor:pointer;box-shadow:0 1px 3px rgba(11,61,102,.05)}
+.statrow b{color:#0B3D66}
+.statrow .arr{color:#0B3D66;font-weight:bold;white-space:nowrap}
+.menurow{display:flex;align-items:center;gap:12px;width:100%;background:#fff;color:#16283A;border:1px solid #DFE8EF;border-radius:14px;padding:13px 15px;margin:7px 0;font-size:19px;text-align:right;cursor:pointer;box-shadow:0 1px 3px rgba(11,61,102,.05);min-height:56px}
+.menurow .mic{font-size:24px}
+.menurow .mtx{flex:1}
+.menurow small{display:block;color:#5A6B7A;font-size:14px}
+.menurow .arr{color:#0B3D66;font-weight:bold}
+details.lvldet{margin-top:10px;background:#F7FAFC;border:1px solid #E8EFF4;border-radius:12px;padding:8px 12px}
+details.lvldet summary{cursor:pointer;font-weight:bold;color:#0B3D66;font-size:16px}
+details.lvldet p{margin:8px 0 4px}
+.greetcard{background:#fff;border:1px solid #DFE8EF;border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(11,61,102,.06)}
+.greetcard .gt{font-size:24px;font-weight:800;color:#16283A}
+/* ===== شريط التبويبات السفلي ===== */
+#tabBar{position:fixed;right:0;left:0;bottom:52px;z-index:9997;background:#fff;border-top:1px solid #DFE8EF;box-shadow:0 -2px 10px rgba(11,61,102,.07)}
+#tabBar .tbIn{max-width:920px;margin:0 auto;display:flex}
+#tabBar button{flex:1;background:none;border:none;color:#5A6B7A;font-size:14px;font-weight:bold;padding:7px 0 9px;margin:0;cursor:pointer;position:relative;border-radius:0;min-height:58px}
+#tabBar button .tic{display:block;font-size:23px;line-height:1.25}
+#tabBar button.on{color:#0B3D66}
+#tabBar button.on::before{content:"";position:absolute;top:0;right:24%;left:24%;height:3px;border-radius:3px;background:#0B3D66}
+@media (min-width:1024px){#tabBar .tbIn{max-width:920px}}
+</style>
+<script>
+/* ===== إعادة التصميم الاحترافية (v11): تنقّل بتبويبات + رئيسية هادئة — طبقة عرض فقط، لا تغيير في البيانات أو المنطق ===== */
+(function(){
+"use strict";
+var $a=document.getElementById('app');
+function escT(t){return (typeof esc==='function')?esc(t):String(t==null?'':t);}
+function uiSetTab(name){
+  var map={home:0,tracks:1,words:2,analytics:3,more:4};
+  var btns=document.querySelectorAll('#tabBar button');
+  btns.forEach(function(b,i){ b.classList.toggle('on', map[name]===i); });
+}
+window.uiSetTab=uiSetTab;
+/* --- شريط التبويبات --- */
+function buildTabBar(){
+  if(document.getElementById('tabBar'))return;
+  var nav=document.createElement('nav'); nav.id='tabBar'; nav.setAttribute('dir','rtl');
+  nav.innerHTML='<div class="tbIn">'
+    +'<button type="button" onclick="goHome()"><span class="tic">🏠</span>الرئيسية</button>'
+    +'<button type="button" onclick="goTracksTab()"><span class="tic">🎯</span>تخصصاتي</button>'
+    +'<button type="button" onclick="goSavedWords()"><span class="tic">⭐</span>كلماتي</button>'
+    +'<button type="button" onclick="goAnalytics()"><span class="tic">📊</span>تحليلي</button>'
+    +'<button type="button" onclick="goMore()"><span class="tic">☰</span>المزيد</button>'
+    +'</div>';
+  document.body.appendChild(nav);
+  setInterval(function(){
+    var rb=document.getElementById('repBar');
+    var vis=rb && getComputedStyle(rb).display!=='none' && rb.getBoundingClientRect().height>0;
+    nav.style.bottom=vis?'52px':'0px';
+    var chip=document.getElementById('repBarShow'); if(chip) chip.style.bottom='70px';
+    var pop=document.getElementById('repPop'); if(pop) pop.style.bottom=vis?'120px':'70px';
+  },700);
+}
+/* --- صفوف التخصصات المدمجة --- */
+function trkRowsHTML(){
+  return SECTIONS.map(function(s){
+    var st=trackStats(s.id), nx=trackNextUnit(s.id);
+    var pct=st.total?Math.round(100*st.done/st.total):0;
+    var sub=st.all?'🏁 أتممت كل وحدات هذا التخصص':'مستواك '+st.cur+' — '+LEVEL_NAMES[st.cur]+' · أنجزت '+st.done+'/'+st.total+' وحدة ('+pct+'٪)';
+    var btns='<div class="tbtns">'
+      +(nx.unit?'<button type="button" onclick="'+trackLessonFn(s.id,nx.unit)+'">▶ درس اليوم</button>':'')
+      +'<button type="button" class="alt" onclick="goSection(\''+s.id+'\')">ادخل ←</button></div>';
+    return '<div class="trkrow"><span class="tic">'+(TRACK_ICONS[s.id]||s.icon)+'</span><div class="tgrow"><b>'+escT(s.title)+'</b><small>'+sub+'</small><div class="tbar"><div style="width:'+pct+'%"></div></div></div>'+btns+'</div>';
+  }).join('');
+}
+function fsCounts(){ var total=4, done=0;
+  try{ if(typeof FS_UNITS!=='undefined'&&FS_UNITS&&FS_UNITS.length){ total=FS_UNITS.length; if(typeof fsUnitDone==='function'){ done=FS_UNITS.filter(function(u){return fsUnitDone(u.id);}).length; } return {done:done,total:total}; } }catch(e){}
+  try{ var u=(typeof progress!=='undefined'&&progress&&progress.fsUnits)||{}; done=Object.keys(u).filter(function(k){return u[k];}).length; }catch(e){}
+  return {done:done,total:total}; }
+function firstStepsRowHTML(){
+  if(typeof fsGo!=='function')return '';
+  var c=fsCounts(), done=c.done>=c.total&&c.total>0;
+  return '<button type="button" class="statrow" onclick="fsGo()"><span>🌱 <b>خطوات أولى</b> — '+(done?'✅ أنهيت وحداتك الأولى':('أنجزت '+c.done+' من '+c.total+' وحدات'))+'</span><span class="arr">'+(done?'راجع ←':'ابدأ ←')+'</span></button>';
+}
+function uiVoiceBannerHTML(){
+  try{
+    var hasKey=(typeof aiCfg!=='undefined'&&aiCfg&&!!aiCfg.key), tts=(typeof vset!=='undefined'&&vset&&!!vset.tts), voice=(typeof vset!=='undefined'&&vset&&vset.ttsVoice)||'Kore';
+    if(hasKey&&tts) return '<div class="card" style="border-color:#BFE3CC;background:#F2F8F4"><h3 style="color:#155C33">🎧 الصوت الطبيعي مفعّل ✓</h3><p style="margin:0">صوت Gemini ('+escT(voice)+') يقرأ لك الحوار والاستماع — كأن إنجليزيًا حقيقيًا يتكلم.</p></div>';
+    if(hasKey&&!tts) return '<div class="card" style="border-color:#E4C95C;background:#FFF8E1"><h3>🎧 الصوت الطبيعي متوقف</h3><p style="margin:0 0 8px">عندك مفتاح Gemini محفوظ، لكن الصوت الطبيعي غير مفعّل — فعّله من استوديو الصوت.</p><button type="button" class="alt" onclick="goVoiceScreen()">🎙️ افتح استوديو الصوت</button></div>';
+    return '<div class="card"><h3>🎧 الصوت الحالي: صوت المتصفح</h3><p style="margin:0 0 8px">للصوت الطبيعي (Gemini) أضف مفتاحك المجاني مرة واحدة.</p><button type="button" class="alt" onclick="goAiSetup()">🔑 إعداد الصوت الطبيعي</button></div>';
+  }catch(e){ return ''; }
+}
+/* --- الرئيسية الجديدة: تُركَّب فوق مخرجات goHome الأصلية (تُحفَظ كل الحقن: خطة المراقب، كلماتي، التحديث، الاحتفالات) --- */
+function uiComposeHome(){
+  var planCard=document.querySelector('#app .desk2-side .card');
+  var swBox=document.getElementById('swHomeBox');
+  var updRow=document.getElementById('espUpdRow');
+  if(swBox){
+    swBox.querySelectorAll('.card').forEach(function(c){ if(c.textContent.indexOf('كلماتي المحفوظة وتحليلي')>=0) c.remove(); });
+    if(!swBox.querySelector('.card')){ swBox.remove(); swBox=null; }
+  }
+  var lvl=currentLevel(), due=srsDue().length;
+  var badges='';
+  try{ badges=BADGES.filter(function(b){return game.badges.includes(b.id);}).map(function(b){return b.icon;}).join(' '); }catch(e){}
+  var plan=todayPlan(), nx=null;
+  for(var i=0;i<plan.length;i++){ if(!plan[i].done){ nx=plan[i]; break; } }
+  var sw=(progress.savedWords||[]), swKnown=sw.filter(function(w){return w.known;}).length;
+  var html='';
+  html+='<div class="greetcard"><div style="display:flex;justify-content:space-between;align-items:center"><span class="gt">أهلًا عبدالمنعم 👋</span><span style="font-size:28px">'+(badges||'🌱')+'</span></div>'
+    +'<div class="uichips"><span class="uichip">🎚️ مستواك '+lvl+' — '+LEVEL_NAMES[lvl]+'</span><span class="uichip">🔥 سلسلة: '+streak()+' يوم</span><span class="uichip">⭐ '+game.xp+' XP</span><span class="uichip">🔁 للمراجعة: '+due+'</span><span class="uichip">📚 كلماتي: '+mastered.length+'</span></div></div>';
+  html+='<div id="uiAlerts"></div>';
+  html+='<div id="uiVoiceBanner">'+uiVoiceBannerHTML()+'</div>';
+  if(nx) html+='<button type="button" class="uicta" onclick="'+nx.fn+'">▶ أكمل درس اليوم<small>'+escT(nx.label)+' · حوالي '+nx.mins+' دقائق</small></button>';
+  else html+='<button type="button" class="uicta" onclick="goLab()">🎉 أنجزت خطة اليوم — أحسنت!<small>جرّب نشاطًا إضافيًا من مختبر الأنشطة</small></button>';
+  if(planCard) html+='<h2 class="uih2">📋 خطة اليوم والمراقب</h2><div id="uiPlan"></div>';
+  html+='<h2 class="uih2">🎯 تخصصاتي</h2>'+trkRowsHTML();
+  html+='<h2 class="uih2">⭐ كلماتي وتقدّمي</h2>'
+    +'<button type="button" class="statrow" onclick="goSavedWords()"><span>⭐ كلمات محفوظة: <b>'+sw.length+'</b> · أتقنتها: <b>'+swKnown+'</b> · لسه صعبة: <b>'+(sw.length-swKnown)+'</b></span><span class="arr">افتح ←</span></button>'
+    +'<button type="button" class="statrow" onclick="goJourney()"><span>🪜 سلّم رحلتي — أين وصلت في كل تخصص؟</span><span class="arr">افتح ←</span></button>'
+    +'<button type="button" class="statrow" onclick="goAnalytics()"><span>📊 تحليلي وفيدباك — نقاط قوتي وضعفي وخطتي العلاجية</span><span class="arr">افتح ←</span></button>';
+  html+='<div id="uiUpd"></div>';
+  $a.innerHTML=html;
+  var al=document.getElementById('uiAlerts'); if(al&&swBox) al.appendChild(swBox);
+  var pl=document.getElementById('uiPlan'); if(pl&&planCard) pl.appendChild(planCard);
+  var up=document.getElementById('uiUpd'); if(up&&updRow) up.appendChild(updRow);
+  window.scrollTo(0,0);
+}
+/* --- تبويب التخصصات: التخصصات + القلب المشترك + السلّم العام --- */
+window.goTracksTab=function(){
+  var ladder='';
+  try{ ladder=ladderHTML().replace(/<p class="muted" style="margin-top:8px">([\s\S]*?)<\/p>/g,'<details class="lvldet"><summary>ℹ️ تفاصيل المستوى: ساعات التعلّم ومكافئ IELTS</summary><p class="muted">$1</p></details>'); }catch(e){ ladder=''; }
+  $a.innerHTML='<h2 class="uititle">🎯 تخصصاتي الأربعة</h2>'
+    +'<p class="muted" style="margin:0 2px 6px">كل تخصص له مساره من A1 إلى C2، والتخصصات تعمل بالتوازي — درس من كل تخصص كل يوم.</p>'
+    +trkRowsHTML()
+    +'<h2 class="uih2">🧩 القلب المشترك — الأساس العام لكل التخصصات</h2>'
+    +firstStepsRowHTML()
+    +'<h2 class="uih2">🪜 سلّم المستويات العام واختبارات العبور</h2>'
+    +'<div id="uiLadderBox">'+ladder+'</div>';
+  uiSetTab('tracks'); window.scrollTo(0,0);
+};
+/* --- تبويب المزيد: كل الأدوات في قوائم نظيفة --- */
+function menuRow(ic,tx,sub,fn){ return '<button type="button" class="menurow" onclick="'+fn+'"><span class="mic">'+ic+'</span><span class="mtx">'+tx+(sub?'<small>'+sub+'</small>':'')+'</span><span class="arr">←</span></button>'; }
+window.goMore=function(){
+  $a.innerHTML='<h2 class="uititle">☰ المزيد</h2>'
+    +'<h2 class="uih2">🧪 التدرّب واللعب</h2>'
+    +menuRow('🧪','مختبر الأنشطة','مهام يومية وألعاب تعلّم متنوعة','goLab()')
+    +menuRow('🎮','ألعاب سريعة وعجلة تحديات','كل جلسة فيها جديد','goGames()')
+    +menuRow('🗣️','رفيق المحادثة','حوارات كاملة ذهابًا وإيابًا','goBuddyList()')
+    +menuRow('🤖','حوار مفتوح حر','بمفتاح Gemini المجاني الخاص بك','goAiChat()')
+    +menuRow('🎯','تحدي اليوم','٣ مهام قصيرة = ٥٠ نقطة','goDaily()')
+    +menuRow('🔁','المراجعة الذكية','عبارات أخطأت فيها من قبل','goReview()')
+    +'<h2 class="uih2">🎧 استماع وقراءة حية</h2>'
+    +menuRow('🎧','استماع حي — BBC','أحدث حلقات 6 Minute English','goLiveListen()')
+    +menuRow('📖','قراءة حية مبسّطة','نصوص من ويكيبيديا المبسّطة','goLiveRead()')
+    +menuRow('📺','شاهد وتعلّم','فيديوهات BBC Learning English','goWatch()')
+    +menuRow('🌐','قاموس حي','تعريف ونطق بشري لأي كلمة','goDictLive()')
+    +'<h2 class="uih2">🏆 أدواتي</h2>'
+    +menuRow('📚','كلماتي المتقنة','كل عبارة أتقنت نطقها','goMyWords()')
+    +menuRow('🏆','شهاداتي وشاراتي','','goBadges()')
+    +menuRow('📋','المراقب والخطة الأسبوعية','والإشعارات','goCoach()')
+    +menuRow('🌐','مصادر مجانية خارجية','BBC وVOA وYouGlish وForvo','goResources()')
+    +'<h2 class="uih2">⚙️ الإعدادات</h2>'
+    +menuRow('🎙️','استوديو الصوت','الصوت الطبيعي وسرعته ونبرته','goVoiceScreen()')
+    +menuRow('🔑','إعداد مفتاح Gemini','للحوار المفتوح والصوت الطبيعي','goAiSetup()')
+    +menuRow('🔄','تحديث التطبيق','لأحدث نسخة — تقدّمك محفوظ','espDoUpdate()')
+    +menuRow('🔁','تصدير / استيراد تقدّمي','بين أجهزتك','goSync()');
+  uiSetTab('more'); window.scrollTo(0,0);
+};
+window.goVoiceScreen=function(){
+  $a.innerHTML='<button type="button" class="alt" onclick="goMore()">⬅ المزيد</button><h2 class="uititle">🎙️ استوديو الصوت</h2>'+voiceSettingsHTML();
+  uiSetTab('more'); window.scrollTo(0,0);
+};
+/* القلب المشترك من داخل التخصصات يذهب لتبويب التخصصات (فيه السلّم) */
+if(typeof window.goHomeLadder==='function'){ window.goHomeLadder=function(){ window.goTracksTab(); }; }
+/* --- لفّ الدوال القائمة: الرئيسية الجديدة + إبراز التبويب النشط --- */
+var _prevGoHome=window.goHome;
+window.goHome=function(){ var r=_prevGoHome.apply(this,arguments); try{ uiComposeHome(); }catch(e){} uiSetTab('home'); return r; };
+var TABMAP={goSavedWords:'words',goMyWords:'words',goAnalytics:'analytics',goJourney:'analytics',goSection:'tracks',
+  goLab:'more',goGames:'more',goBuddyList:'more',goAiChat:'more',goCoach:'more',goBadges:'more',goResources:'more',
+  goLiveListen:'more',goLiveRead:'more',goDictLive:'more',goWatch:'more',goSync:'more',goAiSetup:'more',goDaily:'home',goReview:'home'};
+Object.keys(TABMAP).forEach(function(name){
+  var prev=window[name]; if(typeof prev!=='function')return;
+  window[name]=function(){ var r=prev.apply(this,arguments); uiSetTab(TABMAP[name]); return r; };
+});
+buildTabBar();
+try{ window.goHome(); }catch(e){}
 })();
 </script>
 
