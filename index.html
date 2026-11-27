@@ -1422,5 +1422,329 @@ try{ if(appEl&&appEl.querySelector('.greetcard')){ setScreen('home'); restructur
 })();
 </script>
 
+<style>
+/* ===== v13: ضد التكديس + سلاسة — طبقة عرض فقط (لا منطق ولا بيانات) ===== */
+html{scroll-behavior:smooth}
+@keyframes espIn{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+#app.espAnim{animation:espIn .2s ease-out}
+#app button,#tabBar button{transition:transform .12s ease}
+#app button:active{transform:scale(.97)}
+/* --- أقسام قابلة للطي --- */
+.espfold{background:#fff;border:1px solid #DFE8EF;border-radius:16px;margin:10px 0;overflow:hidden}
+.espfold>summary{cursor:pointer;list-style:none;padding:12px 16px;font-weight:bold;font-size:17.5px;color:#0B3D66;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:28px}
+.espfold>summary::-webkit-details-marker{display:none}
+.espfold>summary::after{content:'▾';color:#5A6B7A;flex:none;transition:transform .2s ease}
+.espfold[open]>summary::after{transform:rotate(180deg)}
+.espfold>.foldbody{padding:2px 8px 8px;animation:espIn .2s ease-out}
+.espfold>.foldbody>.card{border:none!important;box-shadow:none;margin:0!important;border-radius:0;background:transparent!important}
+/* --- صفوف أفقية منزلقة (رقائق) --- */
+.hscroll{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.espchip{flex:none;scroll-snap-align:start;background:#EEF4F8;color:#0B3D66;border:1px solid #DFE8EF;border-radius:999px;padding:9px 15px;font-size:15.5px;font-weight:bold;white-space:nowrap}
+button.espchip{cursor:pointer;min-height:44px;font-family:inherit}
+.espchip.on{background:#0B3D66;color:#fff;border-color:#0B3D66}
+@media (min-width:1024px){ .espLvlChips{grid-column:1/-1} }
+/* --- ترويسة أنحف ومساحة سفلية آمنة (موبايل) --- */
+@media (max-width:1023px){
+  header{padding:6px 14px 8px!important}
+  header h1{font-size:22px!important;margin:0!important;line-height:1.3}
+  header p{font-size:13.5px!important;margin:2px 0 0!important}
+  main#app{padding-bottom:150px}
+}
+/* --- بطاقة الترحيب وبانر الصوت أنحف --- */
+.greetcard{padding:8px 14px!important}
+.greetcard .gt{font-size:22px!important}
+.greetcard .uichip{padding:4px 12px!important;font-size:15px!important}
+.greetcard .uichips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.greetcard .uichips::-webkit-scrollbar{display:none}
+.greetcard .uichip{white-space:nowrap;flex:none}
+#uiVoiceBanner .card{padding:10px 14px!important;display:flex;align-items:center;gap:10px;margin:6px 0!important}
+#uiVoiceBanner h3{font-size:17px!important;margin:0!important;white-space:nowrap;flex:none}
+#uiVoiceBanner p{font-size:14.5px!important;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0!important}
+#uiVoiceBanner button{min-height:38px;padding:5px 14px;font-size:15px;margin:0;flex:none}
+.uicta{padding:13px 16px!important}
+#app:has(.greetcard) .uih2{margin:12px 2px 6px;font-size:19px}
+/* --- بطاقة خطة اليوم النحيفة --- */
+#uiPlan .card.espSlim{padding:10px 14px!important;margin:6px 0!important}
+.espSlim>h3{font-size:19px!important;margin:0 0 2px!important}
+.espPlanSum{font-size:16.5px;color:#33475B;margin:2px 0 4px}
+.espSlim .coachfold,.espSlim .planfold{background:rgba(255,255,255,.55);border-color:rgba(11,61,102,.18);margin:6px 0}
+.espSlim .coachfold>summary,.espSlim .planfold>summary{font-size:15.5px;padding:4px 14px}
+#uiPlan .espSlim .taskrow{flex-wrap:nowrap!important;padding:5px 10px!important;margin:4px 0!important;min-height:46px;box-sizing:border-box}
+#uiPlan .espSlim .taskrow>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16.5px}
+#uiPlan .espSlim .taskrow button{min-height:36px;padding:4px 14px;font-size:15px;flex:none;margin:0}
+.espRemedH{font-weight:bold;color:#2e7d32;font-size:16.5px;margin:6px 0 2px}
+.espRemedReason{font-size:14.5px!important;margin:2px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#uiPlan .espSlim .sw-taskrow{display:flex;gap:6px;align-items:center;margin:3px 0}
+#uiPlan .espSlim .sw-taskrow button{min-height:36px;margin:0}
+#uiAlerts .espfold{margin:6px 0}
+/* --- شاشة الكلمات: بحث + صفوف مدمجة --- */
+.espSearchWrap{margin:10px 0 4px}
+.espSearch{width:100%;box-sizing:border-box;padding:12px 14px;font-size:17px;border:1px solid #DFE8EF;border-radius:12px;font-family:inherit;background:#fff;color:#16283A}
+.espWordLine{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:8px 10px!important}
+.espWordLine br{display:none}
+.espWordLine button.ghost{min-height:34px;padding:4px 9px;font-size:13.5px;margin:0;width:auto}
+.espWordLine .stat{font-size:13.5px!important;padding:2px 8px!important}
+.espWordLine small.muted{font-size:13px!important}
+/* --- طيّات «المزيد» --- */
+.espfold.morefold>.foldbody{padding:2px 0 6px}
+.espfold.morefold .menurow{border:none;border-bottom:1px solid #EDF2F6;border-radius:0;margin:0}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  #app.espAnim,.espfold>.foldbody{animation:none!important}
+  #app button,#tabBar button{transition:none!important}
+  .espfold>summary::after{transition:none}
+}
+</style>
+<script>
+/* ===== v13: مُركِّب ضد التكديس + سلاسة — يلتف حول الدوال القائمة بعد كل الطبقات ===== */
+(function(){
+"use strict";
+var appEl=document.getElementById('app');
+function q(s,r){ return (r||document).querySelector(s); }
+function qa(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
+function makeFold(summaryText, cls){
+  var d=document.createElement('details'); d.className='espfold '+(cls||'');
+  var s=document.createElement('summary'); s.textContent=summaryText; d.appendChild(s);
+  var b=document.createElement('div'); b.className='foldbody'; d.appendChild(b);
+  return {d:d, body:b};
+}
+function foldCard(card, open){
+  if(!card || !card.parentNode) return null;
+  var h3=card.querySelector('h3');
+  var title=h3? h3.textContent.trim().replace(/\s+/g,' ') : 'قسم';
+  if(title.length>72) title=title.slice(0,72)+'…';
+  var f=makeFold(title,'');
+  card.parentNode.insertBefore(f.d, card);
+  f.body.appendChild(card);
+  if(h3) h3.style.display='none';
+  if(open) f.d.open=true;
+  return f.d;
+}
+function wrap(name, fn){
+  try{ if(typeof window[name]==='function'){ var o=window[name];
+    window[name]=function(){ var r=o.apply(this,arguments); try{ fn(); }catch(e){} return r; };
+  } }catch(e){}
+}
+
+/* ---------- ١) الرئيسية: خطة نحيفة + تنبيهات مضغوطة + إزالة ازدواج درس اليوم ---------- */
+/* التقاط شريط الخطة العلاجية من planHTML قبل أن يسقط في تركيب الرئيسية */
+window.__espStrip='';
+try{ if(typeof window.planHTML==='function'){ var _ph13=window.planHTML;
+  window.planHTML=function(){ var h=_ph13.apply(this,arguments);
+    try{ var idx=h.lastIndexOf('<div class="card"'); if(idx>0 && h.slice(idx).indexOf('خطتك العلاجية')>=0) window.__espStrip=h.slice(idx); }catch(e){}
+    return h; };
+} }catch(e){}
+
+function espSlimHome(){
+  if(!appEl || !appEl.querySelector('.greetcard')) return;
+  /* صفوف التخصصات في الرئيسية: بلا زر «درس اليوم» المكرر (يبقى في تبويب التخصصات وداخل التخصص) */
+  qa('#app .trkrow').forEach(function(r){
+    qa('.tbtns button', r).forEach(function(b){ if(!b.classList.contains('alt')) b.remove(); });
+  });
+  /* التنبيهات (تقرير الأسبوع / وحشتنا): شريط سطر واحد + تفاصيل مطوية */
+  qa('#uiAlerts .card').forEach(function(c){
+    if(c.parentNode && c.parentNode.classList && c.parentNode.classList.contains('foldbody')) return;
+    foldCard(c, false);
+  });
+  var card=q('#uiPlan .card');
+  if(!card || card.classList.contains('espSlim')) return;
+  card.classList.add('espSlim');
+  var allP=[], coachBtn=null;
+  Array.prototype.slice.call(card.children).forEach(function(el){
+    if(el.tagName==='P') allP.push(el);
+    if(el.tagName==='BUTTON') coachBtn=el;
+  });
+  var done=0, total=0, streakN=null;
+  try{ var tp=todayPlan(); total=tp.length; done=tp.filter(function(t){ return t.done; }).length; }catch(e){
+    var rr=qa('.taskrow', card); total=rr.length; done=rr.filter(function(r){ return !r.querySelector('button'); }).length;
+  }
+  try{ streakN=streak(); }catch(e){}
+  var sum=document.createElement('div'); sum.className='espPlanSum';
+  sum.innerHTML='🧭 🔥 سلسلة: '+(streakN==null?'—':'<b>'+streakN+'</b>')+' يوم · 📋 مهام اليوم: <b>'+done+'/'+total+'</b>'+((total&&done>=total)?' · 🎉 أنجزت خطة اليوم':'');
+  var h3=card.querySelector('h3');
+  if(h3){ h3.style.display='none'; card.insertBefore(sum, h3.nextSibling); } else card.insertBefore(sum, card.firstChild);
+  /* الطيّة: كل فقرات المراقب (النص الكامل + بيانات الخطة + التخصصات بالتوازي بفقرتيه) + زر صفحة المراقب */
+  var f=makeFold('📋 تفاصيل المراقب والخطة الأسبوعية','coachfold');
+  allP.forEach(function(p){ f.body.appendChild(p); });
+  if(coachBtn) f.body.appendChild(coachBtn);
+  card.insertBefore(f.d, sum.nextSibling);
+  /* إنقاذ مهام الخطة العلاجية (🩺) من الشريط الذي كان يسقط في التركيب */
+  var remRows=[];
+  if(window.__espStrip){
+    try{
+      var tmp=document.createElement('div'); tmp.innerHTML=window.__espStrip;
+      var reasonP=tmp.querySelector('p.muted');
+      remRows=qa('.sw-taskrow', tmp);
+      if(remRows.length){
+        var grp=document.createElement('div'); grp.className='espRemed';
+        var gh=document.createElement('div'); gh.className='espRemedH'; gh.textContent='🩺 مهام خطتك العلاجية — النهاردة';
+        grp.appendChild(gh);
+        if(reasonP){ reasonP.classList.add('espRemedReason'); grp.appendChild(reasonP); }
+        remRows.forEach(function(r){ grp.appendChild(r); });
+        card.insertBefore(grp, f.d.nextSibling);
+      }
+    }catch(e){}
+  }
+  /* سقف الصفوف الظاهرة: العلاجية أولًا ثم مهام الخطة، والباقي في طيّة */
+  var rows=qa(':scope > .taskrow', card);
+  var budget=Math.max(2, 4-remRows.length);
+  if(rows.length>budget){
+    var pf=makeFold('📋 عرض كل مهام اليوم ('+(rows.length+remRows.length)+')','planfold');
+    rows.slice(budget).forEach(function(r){ pf.body.appendChild(r); });
+    card.appendChild(pf.d);
+  }
+  /* عناوين الأقسام المكررة فوق البطاقة والتخصصات (العنوانان صارا ضمنيًا في المحتوى) */
+  qa('#app h2.uih2').forEach(function(h){
+    if(h.textContent.indexOf('خطة اليوم والمراقب')>=0) h.style.display='none';
+    if(h.textContent.indexOf('تخصصاتي')>=0 && h.textContent.length<14) h.style.display='none';
+  });
+}
+
+/* ---------- ٢) شاشة التخصص: رقائق مستويات + طيّ المستويات والأنشطة ---------- */
+function espSection(){
+  if(!appEl) return;
+  /* طيّ فقرة الشرح الطويلة أعلى المسار */
+  qa('#app > p.muted').forEach(function(p){
+    if(p.getBoundingClientRect().height>80 && !p.parentNode.classList.contains('foldbody')){
+      var f=makeFold('ℹ️ حول مسار هذا التخصص','');
+      p.parentNode.insertBefore(f.d, p); f.body.appendChild(p);
+    }
+  });
+  var cards=qa('#app .card');
+  var actH3=qa('#app h3').filter(function(h){ return h.textContent.indexOf('أنشطة هذا التخصص')>=0; })[0];
+  var lvlCards=[], actCards=[];
+  cards.forEach(function(c){
+    if(actH3 && (actH3.compareDocumentPosition(c)&4)) actCards.push(c); else lvlCards.push(c);
+  });
+  var curCard=null;
+  lvlCards.forEach(function(c){ if(c.querySelector('.tpath')) curCard=c; });
+  if(!curCard) curCard=lvlCards.filter(function(c){ var h=c.querySelector('h3'); return h && h.textContent.indexOf('🔒')<0; })[0] || lvlCards[0];
+  var foldOf={};
+  lvlCards.forEach(function(c){ if(c!==curCard) foldOf[lvlCards.indexOf(c)]=foldCard(c, false); });
+  /* رقائق المستويات الأفقية */
+  if(lvlCards.length>1 && curCard){
+    var chips=document.createElement('div'); chips.className='hscroll espLvlChips';
+    lvlCards.forEach(function(c, i){
+      var h=c.querySelector('h3'); var m=h? h.textContent.match(/(A1|A2|B1|B2|C1|C2)/) : null;
+      var code=m? m[1] : ('مستوى '+(i+1));
+      var dm=h? h.textContent.match(/\((\d+)\/(\d+) وحدات/) : null;
+      var state=(h && h.textContent.indexOf('🔒')>=0)? ' 🔒' : (dm && +dm[1]>0 && +dm[1]>=+dm[2])? ' ✓' : (c===curCard? ' 📍' : '');
+      var b=document.createElement('button'); b.type='button'; b.className='espchip'+(c===curCard?' on':'');
+      b.textContent=code+state;
+      b.addEventListener('click', function(){
+        var target=foldOf[i]||c;
+        if(target.tagName==='DETAILS') target.open=true;
+        (foldOf[i]||c).scrollIntoView({behavior:'smooth', block:'start'});
+      });
+      chips.appendChild(b);
+    });
+    var anchor=lvlCards[0];
+    var host=(anchor.parentNode && anchor.parentNode.classList.contains('cardgrid'))? anchor.parentNode : anchor;
+    host.parentNode.insertBefore(chips, host);
+  }
+  actCards.forEach(function(c, i){ if(i>0) foldCard(c, false); });
+}
+
+/* ---------- ٣) التحليلات: الفيدباك مفتوح والباقي مطوي + تخصصات رقائق ---------- */
+function espAnalytics(){
+  if(!appEl) return;
+  var cards=qa('#app .card');
+  cards.forEach(function(c){
+    var h3=c.querySelector('h3'); if(!h3) return;
+    if(h3.textContent.indexOf('تخصصاتك')>=0){
+      var lines=qa(':scope > div', c).filter(function(d){ return d.textContent.trim().indexOf('•')===0; });
+      if(lines.length){
+        var wrapEl=document.createElement('div'); wrapEl.className='hscroll';
+        lines[0].parentNode.insertBefore(wrapEl, lines[0]);
+        lines.forEach(function(d){
+          var m=d.textContent.match(/•\s*(.+?):\s*(\d+)\/(\d+)\s*وحدة\s*\((\d+)٪\)\s*—\s*مستواك الحالي فيه\s*(\S+)/);
+          d.classList.add('espchip');
+          d.textContent=m? (m[1]+' · '+m[2]+'/'+m[3]+' · '+m[4]+'٪ · '+m[5]) : d.textContent.replace(/^•\s*/,'');
+          wrapEl.appendChild(d);
+        });
+      }
+    }
+  });
+  cards.forEach(function(c){
+    var h3=c.querySelector('h3'); if(!h3) return;
+    if(h3.textContent.indexOf('فيدباك صريح')>=0) return; /* الأساسي يبقى مفتوحًا */
+    foldCard(c, false);
+  });
+}
+
+/* ---------- ٤) الكلمات: بحث + صفوف مدمجة + طيّ التوزيع ---------- */
+function espWords(){
+  if(!appEl) return;
+  qa('#app .card').forEach(function(c){
+    var h3=c.querySelector('h3');
+    if(h3 && h3.textContent.indexOf('جت منين')>=0) foldCard(c, false);
+  });
+  var lines=qa('#app .line');
+  lines.forEach(function(l){ l.classList.add('espWordLine'); });
+  if(lines.length && !q('.espSearchWrap')){
+    var w=document.createElement('div'); w.className='espSearchWrap';
+    var inp=document.createElement('input'); inp.type='search'; inp.className='espSearch';
+    inp.setAttribute('placeholder','🔍 ابحث في كلماتك المحفوظة…');
+    inp.addEventListener('input', function(){
+      var v=inp.value.trim().toLowerCase();
+      qa('#app .line').forEach(function(l){ l.style.display=(!v || l.textContent.toLowerCase().indexOf(v)>=0)? '' : 'none'; });
+    });
+    w.appendChild(inp);
+    lines[0].parentNode.insertBefore(w, lines[0]);
+  }
+}
+
+/* ---------- ٥) المزيد: أول مجموعة مفتوحة والباقي مطوي ---------- */
+function espMore(){
+  if(!appEl) return;
+  var kids=Array.prototype.slice.call(appEl.children), groups=[], cur=null;
+  kids.forEach(function(el){
+    if(el.tagName==='H2' && el.classList.contains('uih2')){ cur={h:el, rows:[]}; groups.push(cur); }
+    else if(cur && el.classList.contains('menurow')) cur.rows.push(el);
+  });
+  groups.forEach(function(g, i){
+    if(i===0 || !g.rows.length) return;
+    var f=makeFold(g.h.textContent.trim()+' ('+g.rows.length+')','morefold');
+    g.h.parentNode.insertBefore(f.d, g.h);
+    g.rows.forEach(function(r){ f.body.appendChild(r); });
+    g.h.remove();
+  });
+}
+
+/* ---------- ٦) تبويب التخصصات: طيّ بطاقات السلّم عدا المستوى الحالي ---------- */
+function espFoldLadder(){
+  var box=q('#uiLadderBox'); if(!box) return;
+  var cur=''; try{ cur=currentLevel(); }catch(e){}
+  qa(':scope > .card', box).forEach(function(c){
+    var h3=c.querySelector('h3'); if(!h3) return;
+    if(cur && h3.textContent.indexOf(cur)>=0) return;
+    foldCard(c, false);
+  });
+}
+
+wrap('goHome', espSlimHome);
+wrap('goSection', espSection);
+wrap('goAnalytics', espAnalytics);
+wrap('goSavedWords', espWords);
+wrap('goMore', espMore);
+wrap('goTracksTab', espFoldLadder);
+
+/* ---------- ٧) سلاسة التنقّل: تلاشٍ وانزلاق خفيف عند تبدّل الشاشة ---------- */
+if(appEl && window.MutationObserver){
+  var lastSig='', lastAnim=0;
+  new MutationObserver(function(){
+    var first=appEl.firstElementChild;
+    var sig=first? (first.tagName+'.'+first.className+'#'+(first.textContent||'').slice(0,24)) : '';
+    if(sig===lastSig) return; lastSig=sig;
+    var now=Date.now(); if(now-lastAnim<150) return; lastAnim=now;
+    appEl.classList.remove('espAnim'); void appEl.offsetWidth; appEl.classList.add('espAnim');
+  }).observe(appEl, {childList:true});
+}
+/* أول تحميل: الرئيسية قد تكون رُسمت قبل هذه الطبقة */
+try{ espSlimHome(); }catch(e){}
+})();
+</script>
+
 </body>
 </html>
