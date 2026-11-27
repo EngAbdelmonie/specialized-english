@@ -488,5 +488,350 @@ try{goHome()}catch(e){}
 const _gg=goGames;goGames=function(){_gg();try{const g=$app.querySelector(".grid");if(g)g.insertAdjacentHTML("beforeend",'<div class="card"><h3>🧪 مختبر الأنشطة الجديد</h3><p class="muted">بطاقات قابلة للقلب، ترتيب كلمات، تصحيح جمل، قصص تفاعلية، مطابقة ضد الساعة، مهام يومية وصندوق مفاجآت.</p><button class="big" onclick="goLab()">ادخل المختبر 🧪</button></div>')}catch(e){}}})();
 
 </script>
+<style>
+.sw-nodes{display:flex;gap:6px;flex-wrap:wrap}
+.sw-node{border:1.5px solid #bbb;border-radius:10px;padding:6px 10px;text-align:center;font-size:13px;background:#fff;color:#111;min-width:64px}
+.sw-node.done{border-color:#2e7d32;background:#e8f5e9}
+.sw-node.cur{border-color:#c9a227;background:#fff6da}
+.sw-node.lock{opacity:.55}
+.sw-celeb{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}
+.sw-celeb-card{background:#fff;border:3px solid #c9a227;border-radius:16px;padding:22px;max-width:420px;width:100%;text-align:center;color:#111;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.sw-taskrow{display:flex;gap:6px;align-items:center;margin:5px 0}
+</style>
+<script>
+/* ===== ⭐ بنك الكلمات المحفوظة + 🪜 سلّم الرحلة + 📊 التحليل والفيدباك + 🩺 الخطة العلاجية — إضافة ٢٧ نوفمبر ٢٠٢٦ =====
+   كل البيانات داخل esp2_progress نفسه (savedWords / skillStats / counters / trackTouch / remedial) فتدخل التصدير والاستيراد تلقائيًا. */
+(function(){
+'use strict';
+var SKILL_NAMES={listening:'الاستماع',speaking:'التحدث والنطق',vocab:'المفردات',grammar:'القواعد'};
+var SW_LADDER=[25,50,100,200,400];
+var SW_FILTER='all', SW_VIEW=[], SW_REV=null, SW_CUR='home', SW_CELEB_Q=[];
+var SWCTX={track:'',level:'',src:''};
+function swSave(){ try{ saveProgress(); }catch(e){} }
+function swDateStr(off){ var d=new Date(); d.setDate(d.getDate()+(off||0)); return d.toISOString().slice(0,10); }
+function swNorm(w){ return String(w||'').trim().toLowerCase(); }
+function swCounts(){ var a=(progress&&progress.savedWords)||[]; var kn=0; for(var i=0;i<a.length;i++) if(a[i].known) kn++; return {total:a.length, known:kn, hard:a.length-kn, mastered:(typeof mastered!=='undefined'&&mastered)?mastered.length:0}; }
+function swFind(w){ var k=swNorm(w); var a=progress.savedWords; for(var i=0;i<a.length;i++) if(swNorm(a[i].w)===k) return i; return -1; }
+function swIsSaved(w){ return swFind(w)>=0; }
+function swCtx(){ var h=''; try{ var el=document.querySelector('#app h2'); if(el) h=el.textContent.trim().slice(0,60); }catch(e){} return {track:SWCTX.track||'', level:SWCTX.level||'', src:SWCTX.src||h||'عام'}; }
+function swSaveWord(w,m,ctx){ w=String(w||'').trim(); if(!w) return; var c=ctx||swCtx(); var i=swFind(w);
+  if(i>=0){ var x=progress.savedWords[i]; if(m) x.m=m; x.track=c.track||x.track||''; x.level=c.level||x.level||''; if(c.src) x.src=c.src; }
+  else progress.savedWords.push({w:w, m:m||'', track:c.track||'', level:c.level||'', src:c.src||'عام', ts:Date.now(), known:false});
+  swSave(); swCheckMilestones(); }
+function swRemoveWord(w){ var i=swFind(w); if(i>=0){ progress.savedWords.splice(i,1); swSave(); } }
+
+/* ---------- التهيئة الآمنة للتقدم القائم ---------- */
+function swInit(){
+  if(typeof progress==='undefined'||!progress) return false;
+  if(!Array.isArray(progress.savedWords)) progress.savedWords=[];
+  progress.skillStats=progress.skillStats||{};
+  ['listening','speaking','vocab','grammar'].forEach(function(k){ var v=progress.skillStats[k]; if(!v||typeof v.ok!=='number'||typeof v.total!=='number') progress.skillStats[k]={ok:(v&&v.ok)||0,total:(v&&v.total)||0}; });
+  progress.counters=progress.counters||{};
+  if(!Array.isArray(progress.counters.celebrated)) progress.counters.celebrated=[];
+  if(!progress.counters.lastReportTs) progress.counters.lastReportTs=Date.now();
+  if(!progress.trackTouch) progress.trackTouch={};
+  var now=Date.now();
+  try{ SECTIONS.forEach(function(sec){ if(progress.trackTouch[sec.id]==null){ var st=trackStats(sec.id); progress.trackTouch[sec.id]= st.done>0? now : 0; } }); }catch(e){}
+  var last=progress.counters.lastSessionTs||0;
+  progress.counters.gapDays= last? Math.floor((now-last)/864e5) : 0;
+  progress.counters.lastSessionTs=now;
+  if(!('remedial' in progress)) progress.remedial=null;
+  swSave();
+  return true;
+}
+
+/* ---------- الاحتفالات بالإنجازات (تُطلق مرة واحدة) ---------- */
+function swCelebrate(key,msg){ if(progress.counters.celebrated.indexOf(key)>=0) return; progress.counters.celebrated.push(key); swSave(); try{ confetti(); }catch(e){} SW_CELEB_Q.push(msg); if(!document.getElementById('swCeleb')) swCelebNext(); }
+function swCelebNext(){ var msg=SW_CELEB_Q.shift(); if(!msg) return; var d=document.createElement('div'); d.id='swCeleb'; d.className='sw-celeb'; d.setAttribute('dir','rtl');
+  d.innerHTML='<div class="sw-celeb-card"><div style="font-size:52px">🎉🏆</div><h3>إنجاز جديد يا بطل!</h3><p style="font-size:18px">'+esc(msg)+'</p><button type="button" class="big" onclick="swCelebClose()">برافو عليّا 💪 كمّل</button></div>'; document.body.appendChild(d); }
+window.swCelebClose=function(){ var d=document.getElementById('swCeleb'); if(d) d.remove(); swCelebNext(); };
+function swCheckMilestones(){ var c=swCounts(); SW_LADDER.forEach(function(n){ if(c.total>=n) swCelebrate('saved'+n,'وصلت '+n+' كلمة محفوظة في بنك كلماتك ⭐ كل كلمة هنا هي خطوة ثابتة في رحلتك.'); if(c.mastered>=n) swCelebrate('mast'+n,'وصلت '+n+' عبارة أتقنتها بالنطق 🏆 صوتك بيقوى يوم بعد يوم.'); });
+  var st=0; try{ st=streak(); }catch(e){} [7,14,30].forEach(function(n){ if(st>=n) swCelebrate('streak'+n,'سلسلة '+n+' يوم تعلّم متواصل 🔥 الاستمرارية دي هي سر الإتقان الحقيقي.'); }); }
+
+/* ---------- نافذة القاموس (الضغط على أي كلمة): زر الحفظ ---------- */
+function swCleanMean(t){ return String(t||'').replace(/^\s*—\s*/,'').replace(/\s*\([^)]*\)\s*$/,'').trim(); }
+function swPopMeaning(p){ var m=p.querySelector('#fsPopMean'); if(m){ if(m.textContent.indexOf('⏳')>=0) return null; return swCleanMean(m.textContent); }
+  var spans=p.querySelectorAll('span'); for(var i=0;i<spans.length;i++){ var t=spans[i].textContent||''; if(t.indexOf('—')===0) return swCleanMean(t); } return ''; }
+function swPopToggle(p,b){ var w=p.dataset.word||''; if(!w) return;
+  if(swIsSaved(w)){ swRemoveWord(w); b.textContent='⭐ احفظ الكلمة'; try{ toast('أُزيلت «'+w+'» من كلماتك المحفوظة'); }catch(e){} return; }
+  var m=swPopMeaning(p);
+  if(m===null){ var tries=0; var iv=setInterval(function(){ tries++; var mm=swPopMeaning(p); if(mm!==null||tries>12){ clearInterval(iv); swSaveWord(w,mm||''); b.textContent='★ محفوظة — إزالة'; try{ toast('⭐ حُفظت «'+w+'» في كلماتك المحفوظة'); }catch(e){} } },300); return; }
+  swSaveWord(w,m); b.textContent='★ محفوظة — إزالة'; try{ toast('⭐ حُفظت «'+w+'» في كلماتك المحفوظة'); }catch(e){} }
+function swPopBtn(p){ if(!p||p.querySelector('.sw-pop-save')) return; var w=p.dataset.word||''; var b=document.createElement('button'); b.type='button'; b.className='alt sw-pop-save';
+  b.textContent= swIsSaved(w)? '★ محفوظة — إزالة' : '⭐ احفظ الكلمة';
+  b.onclick=function(){ swPopToggle(p,b); };
+  var gh=p.querySelector('.ghost'); if(gh) p.insertBefore(b,gh); else p.appendChild(b); }
+
+/* ---------- نجوم الحفظ في ملخص المصطلحات وبطاقات المختبر ---------- */
+function swStarBtn(labelSaved,onclick){ var b=document.createElement('button'); b.type='button'; b.className='ghost sw-star'; b.textContent=labelSaved?'★':'☆'; b.title='احفظ في كلماتي المحفوظة'; b.onclick=onclick; return b; }
+function swInjectGlossStars(sec){ var rows=document.querySelectorAll('#app table tr');
+  rows.forEach(function(row){ if(row.querySelector('th')) return; var cells=row.querySelectorAll('td'); if(cells.length<3) return;
+    var term=cells[0].textContent.trim(); var mean=cells[2].textContent.trim(); if(!term) return; var last=cells[cells.length-1]; if(last.querySelector('.sw-star')) return;
+    var b=swStarBtn(swIsSaved(term),function(){ if(swIsSaved(term)){ swRemoveWord(term); b.textContent='☆'; try{ toast('أُزيلت «'+term+'»'); }catch(e){} } else { swSaveWord(term,mean,{track:sec,level:'',src:'ملخص مصطلحات'}); b.textContent='★'; try{ toast('⭐ حُفظت «'+term+'» في كلماتك'); }catch(e){} } });
+    last.appendChild(b); }); }
+function swInjectFlipStar(){ try{ if(typeof _flip==='undefined'||!_flip||_flip.i>=_flip.deck.length) return; }catch(e){ return; }
+  var box=document.getElementById('flipBox'); if(!box||box.querySelector('.sw-star')) return; var it=_flip.deck[_flip.i]; if(!it||!it.en) return;
+  var wrap=document.createElement('div'); wrap.style.cssText='text-align:center;margin-top:8px';
+  var b=swStarBtn(swIsSaved(it.en),function(){ if(swIsSaved(it.en)){ swRemoveWord(it.en); b.textContent='☆'; } else { swSaveWord(it.en,it.ar||'',{track:it.sec||'',level:'',src:'بطاقات المختبر 🃏'}); b.textContent='★'; try{ toast('⭐ حُفظت «'+it.en+'»'); }catch(e){} } });
+  b.className='alt sw-star'; b.textContent=(swIsSaved(it.en)?'★ محفوظة':'☆ احفظ الكلمة'); wrap.appendChild(b); box.appendChild(wrap); }
+
+/* ---------- شاشة بنك الكلمات المحفوظة ---------- */
+window.swSetFilter=function(f){ SW_FILTER=f; goSavedWords(); };
+window.swAct=function(act,i){ var it=SW_VIEW[i]; if(!it) return;
+  if(act==='speak'){ try{ speak(it.w); }catch(e){} }
+  else if(act==='rep'){ try{ startRepeat(it.w); }catch(e){} }
+  else if(act==='known'){ it.known=!it.known; if(it.known){ try{ addXP(5,'أتقنت كلمة صعبة'); }catch(e){} } swSave(); goSavedWords(); }
+  else if(act==='del'){ var ix=progress.savedWords.indexOf(it); if(ix>=0) progress.savedWords.splice(ix,1); swSave(); goSavedWords(); } };
+window.goSavedWords=function(){ SW_CUR='saved'; var c=swCounts();
+  var list=progress.savedWords.slice().sort(function(a,b){ return b.ts-a.ts; });
+  if(SW_FILTER==='hard') list=list.filter(function(x){ return !x.known; });
+  if(SW_FILTER==='known') list=list.filter(function(x){ return x.known; });
+  SW_VIEW=list;
+  var trows=SECTIONS.map(function(sec){ var items=progress.savedWords.filter(function(x){ return x.track===sec.id; }); if(!items.length) return ''; var kn=items.filter(function(x){ return x.known; }).length;
+    return '<div>• '+esc(sec.title)+': <b>'+items.length+'</b> كلمة (أتقنت منها '+kn+')</div>'; }).join('');
+  var other=progress.savedWords.filter(function(x){ return !x.track||!secById(x.track); });
+  if(other.length) trows+='<div>• عام / مصادر أخرى: <b>'+other.length+'</b> كلمة</div>';
+  var lvRows=LEVELS.map(function(lv){ var n=progress.savedWords.filter(function(x){ return x.level===lv; }).length; return n? '<div>• مستوى '+lv+': <b>'+n+'</b></div>' : ''; }).join('');
+  var bySrc={}; progress.savedWords.forEach(function(x){ var k=x.src||'عام'; bySrc[k]=(bySrc[k]||0)+1; });
+  var srows=Object.keys(bySrc).sort(function(a,b){ return bySrc[b]-bySrc[a]; }).slice(0,12).map(function(k){ return '<div>• '+esc(k)+': <b>'+bySrc[k]+'</b> كلمة</div>'; }).join('');
+  var items=list.map(function(it,i){ var trk=(it.track&&secById(it.track))? secById(it.track).title : '';
+    var meta=[trk,it.level||'',it.src||''].filter(Boolean).join(' · ');
+    return '<div class="line"><span class="en" style="font-size:22px"><b>'+esc(it.w)+'</b></span> '+(it.known? '<span class="stat">✅ أتقنتها</span>' : '<span class="stat">🔥 لسه صعبة</span>')+'<br>'+esc(it.m||'—')+'<br><small class="muted">'+esc(meta)+' · '+new Date(it.ts).toISOString().slice(0,10)+'</small><br><button type="button" class="ghost" onclick="swAct(\'speak\','+i+')">🔊 اسمعها</button> <button type="button" class="ghost" onclick="swAct(\'rep\','+i+')">🔁 كررها حتى تحفظها</button> <button type="button" class="ghost" onclick="swAct(\'known\','+i+')">'+(it.known?'↩ لسه صعبة':'✅ أتقنتها')+'</button> <button type="button" class="ghost" onclick="swAct(\'del\','+i+')">✕ إزالة</button></div>'; }).join('');
+  $app.innerHTML='<button class="alt" onclick="goHome()">⬅ الرئيسية</button><h2>⭐ كلماتي المحفوظة ('+c.total+')</h2>'
+    +'<div class="card"><p>📚 كلمات محفوظة: <b>'+c.total+'</b> · ✅ أتقنتها: <b>'+c.known+'</b> · 🔥 لسه صعبة: <b>'+c.hard+'</b><br>🏆 عبارات أتقنها التطبيق (بالنطق): <b>'+c.mastered+'</b></p>'
+    +(c.hard? '<button class="big" onclick="goSavedReview()">🃏 راجع كلماتي الصعبة ('+c.hard+')</button>' : '')
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="alt" onclick="swSetFilter(\'all\')">الكل ('+c.total+')</button><button class="alt" onclick="swSetFilter(\'hard\')">لسه صعبة ('+c.hard+')</button><button class="alt" onclick="swSetFilter(\'known\')">أتقنتها ('+c.known+')</button></div></div>'
+    +(progress.savedWords.length? '<div class="card"><h3>📍 كلماتك جت منين؟ (حسب التخصص والمستوى والدرس)</h3>'+trows+lvRows+'<h4>حسب الدرس / المصدر:</h4>'+srows+'</div>' : '')
+    +(list.length? items : '<div class="card"><p>'+(progress.savedWords.length? 'لا كلمات في العرض ده — جرّب فلتر تاني.' : 'لسه ما حفظتش أي كلمة. اضغط أي كلمة إنجليزية في أي درس أو مشهد، وهتظهر لك نافذة فيها زر «⭐ احفظ الكلمة» — الكلمات الصعبة اللي تحفظها هتلاقيها دايمًا هنا عشان ترجع لها في أي وقت.')+'</p></div>');
+  window.scrollTo(0,0); };
+
+/* ---------- مراجعة الكلمات الصعبة ببطاقات قابلة للقلب ---------- */
+window.goSavedReview=function(){ var hard=progress.savedWords.filter(function(x){ return !x.known; });
+  if(!hard.length){ try{ toast('مفيش كلمات صعبة دلوقتي 🎉'); }catch(e){} return; }
+  SW_REV={deck:hard.slice().sort(function(){ return Math.random()-0.5; }), i:0, flipped:false, doneKnown:0}; swRevRender(); };
+function swRevRender(){ var r=SW_REV; if(!r) return;
+  if(r.i>=r.deck.length){ $app.innerHTML='<button class="alt" onclick="goSavedWords()">⬅ كلماتي المحفوظة</button><div class="center"><div style="font-size:52px">🃏🎉</div><h2>خلصت جولة المراجعة!</h2><p>أتقنت '+r.doneKnown+' كلمة في الجولة دي 💪</p><button class="big" onclick="goSavedWords()">⭐ كلماتي المحفوظة</button></div>'; window.scrollTo(0,0); return; }
+  var it=r.deck[r.i];
+  $app.innerHTML='<button class="alt" onclick="goSavedWords()">⬅ كلماتي المحفوظة</button><h2>🃏 مراجعة كلماتي الصعبة ('+(r.i+1)+'/'+r.deck.length+')</h2>'
+    +'<div class="card center" style="cursor:pointer" onclick="swRevFlip()"><div class="en" style="font-size:34px"><b>'+esc(it.w)+'</b></div>'+(r.flipped? '<div style="font-size:22px;margin-top:8px">'+esc(it.m||'—')+'</div>' : '<p class="muted">اضغط البطاقة لعرض المعنى</p>')+'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="alt" onclick="swRevSpeak()">🔊 اسمعها</button><button class="alt" onclick="swRevFlip()">🔄 اقلب البطاقة</button>'
+    +(r.flipped? '<button class="big" onclick="swRevMark(false)">🔁 لسه صعبة</button><button class="big" onclick="swRevMark(true)">✅ أتقنتها</button>' : '')+'</div>';
+  window.scrollTo(0,0); }
+window.swRevFlip=function(){ if(SW_REV){ SW_REV.flipped=!SW_REV.flipped; swRevRender(); } };
+window.swRevSpeak=function(){ if(SW_REV){ try{ speak(SW_REV.deck[SW_REV.i].w); }catch(e){} } };
+window.swRevMark=function(k){ if(!SW_REV) return; var it=SW_REV.deck[SW_REV.i];
+  if(k){ it.known=true; SW_REV.doneKnown++; try{ addXP(5,'أتقنت كلمة صعبة'); }catch(e){} swSave(); }
+  SW_REV.i++; SW_REV.flipped=false; swRevRender(); };
+
+/* ---------- 🪜 سلّم الرحلة ---------- */
+function swStageName(){ var lv='A1'; try{ lv=currentLevel(); }catch(e){}
+  if(lv==='A1'||lv==='A2') return '🌱 مرحلة التأسيس'; if(lv==='B1') return '🧱 مرحلة البناء'; if(lv==='B2') return '🚀 مرحلة الانطلاق'; return '🏆 مرحلة التمكّن'; }
+window.goJourney=function(){ SW_CUR='journey'; var totalD=0,totalT=0;
+  var rows=SECTIONS.map(function(sec){ var st=trackStats(sec.id); totalD+=st.done; totalT+=st.total;
+    var chips=LEVELS.map(function(lv){ var us=trackUnitsFor(sec.id,lv); if(!us.length) return '';
+      var dn=us.filter(function(u){ return progress.units[u.id]; }).length;
+      var state,cls; if(dn===us.length){ state='✅ تم'; cls='sw-node done'; } else if(lv===st.cur){ state='📍 أنت هنا'; cls='sw-node cur'; } else if(!levelUnlocked(lv)){ state='🔒 مقفل'; cls='sw-node lock'; } else { state='⬜ جاي'; cls='sw-node'; }
+      return '<span class="'+cls+'"><b>'+lv+'</b> '+state+'<br><small>'+dn+'/'+us.length+' وحدة</small></span>'; }).join('');
+    var icon=sec.icon; try{ if(typeof TRACK_ICONS!=='undefined'&&TRACK_ICONS[sec.id]) icon=TRACK_ICONS[sec.id]; }catch(e){}
+    return '<div class="card"><h3>'+icon+' '+esc(sec.title)+' — تقدّمك '+st.pct+'٪ ('+st.done+'/'+st.total+')</h3><div class="sw-nodes">'+chips+'</div></div>'; }).join('');
+  var pct=totalT? Math.round(100*totalD/totalT) : 0; var lv='A1'; try{ lv=currentLevel(); }catch(e){}
+  var st=0,xp=0; try{ st=streak(); xp=game.xp||0; }catch(e){}
+  $app.innerHTML='<button class="alt" onclick="goHome()">⬅ الرئيسية</button><h2>🪜 سلّم رحلتي</h2>'
+    +'<div class="card"><p>🏁 تقدّمك الكلي في التخصصات الأربعة: <b>'+totalD+'/'+totalT+'</b> وحدة ('+pct+'٪)<br>🎚️ مرحلتك الحالية: <b>'+swStageName()+'</b> (مستوى '+lv+')<br>🔥 سلسلة أيامك: <b>'+st+'</b> يوم · ⭐ نقاط خبرتك: <b>'+xp+'</b></p></div>'+rows;
+  window.scrollTo(0,0); };
+
+/* ---------- 📊 التحليل والفيدباك ---------- */
+function swSkillNext(k,weakest){ var secId=weakest? weakest.sec.id : 'safety'; var title=secById(secId).title;
+  if(k==='grammar'){ var st=trackStats(secId); return {label:'درس قواعد مصغّر في «'+title+'» مستوى '+st.cur, act:"goGrammar('"+secId+"','"+st.cur+"')"}; }
+  if(k==='vocab') return {label:'جولة بطاقات مفردات في المختبر', act:'goFlip()'};
+  if(k==='speaking') return {label:'تحدي نطق اليوم في المختبر', act:'goPron()'};
+  var nx=trackNextUnit(secId); if(nx&&nx.unit) return {label:'درس استماع في «'+title+'»: '+nx.unit.name, act:trackLessonFn(secId,nx.unit)};
+  return {label:'تحدي اليوم', act:'goDaily()'}; }
+function swFeedback(){ var sts=SECTIONS.map(function(sec){ return {sec:sec, st:trackStats(sec.id)}; });
+  var started=sts.filter(function(x){ return x.st.done>0; });
+  var strongest=null,weakest=null,focused=null;
+  started.forEach(function(x){ if(!strongest||x.st.pct>strongest.st.pct) strongest=x; if(!weakest||x.st.pct<weakest.st.pct) weakest=x; if(!focused||x.st.done>focused.st.done) focused=x; });
+  var ss=progress.skillStats, worstSkill=null, bestSkill=null;
+  ['listening','speaking','vocab','grammar'].forEach(function(k){ var v=ss[k]; if(v&&v.total>=10){ var acc=v.ok/v.total; if(!worstSkill||acc<worstSkill.acc) worstSkill={k:k,acc:acc}; if(!bestSkill||acc>bestSkill.acc) bestSkill={k:k,acc:acc}; } });
+  var sc=swCounts(); var next=null;
+  if(sc.hard>=5) next={label:'راجع '+Math.min(10,sc.hard)+' كلمات من كلماتك الصعبة', act:'goSavedReview()'};
+  else if(worstSkill&&worstSkill.acc<0.6) next=swSkillNext(worstSkill.k,weakest);
+  else if(weakest){ var nx=trackNextUnit(weakest.sec.id); if(nx&&nx.unit) next={label:'الدرس الجاي في «'+weakest.sec.title+'»: '+nx.unit.name, act:trackLessonFn(weakest.sec.id,nx.unit)}; }
+  if(!next&&focused){ var nx2=trackNextUnit(focused.sec.id); if(nx2&&nx2.unit) next={label:'كمّل في «'+focused.sec.title+'»: '+nx2.unit.name, act:trackLessonFn(focused.sec.id,nx2.unit)}; }
+  if(!next) next={label:'ابدأ أول درس في تخصص السلامة', act:"goSection('safety')"};
+  return {strongest:strongest, weakest:weakest, focused:focused, worstSkill:worstSkill, bestSkill:bestSkill, next:next, sts:sts}; }
+window.swGoNext=function(){ var fb=swFeedback(); try{ (new Function(fb.next.act))(); }catch(e){} };
+
+function swReportData(){ var since=progress.counters.lastReportTs||0; var sd=new Date(since).toISOString().slice(0,10);
+  return { saved:progress.savedWords.filter(function(x){ return x.ts>=since; }).length,
+    mastered:(typeof mastered!=='undefined'&&mastered)? mastered.filter(function(x){ return x.date>=sd; }).length : 0,
+    days:(typeof game!=='undefined'&&game.days)? game.days.filter(function(x){ return x>=sd; }).length : 0 }; }
+function swReportHTML(){ var d=swReportData(); var fb=swFeedback();
+  return '<div class="card" style="border-color:#1565c0;background:#eef4fb"><h3>📅 تقرير الأسبوع</h3><p>أيام نشاطك في الفترة دي: <b>'+d.days+'</b> · كلمات حفظتها في بنكك: <b>'+d.saved+'</b> · عبارات أتقنتها: <b>'+d.mastered+'</b><br>🎯 أهم توصية ليك: '+esc(fb.next.label)+'</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="big" onclick="swGoNext()">ابدأ التوصية ←</button><button class="ghost" onclick="swDismissReport()">✕ إخفاء التقرير</button></div></div>'; }
+window.swDismissReport=function(){ progress.counters.lastReportTs=Date.now(); swSave(); if(SW_CUR==='analytics') goAnalytics(); else goHome(); };
+window.swDismissGap=function(){ progress.counters.gapDays=0; swSave(); goHome(); };
+
+/* ---------- 🩺 الخطة العلاجية ---------- */
+function swDiagnose(){ var out=[]; var c=progress.counters;
+  if((c.gapDays||0)>=3) out.push({key:'inactive', kind:'return', reason:'بقالك '+c.gapDays+' أيام من غير جلسة — خطة رجوع هادية ترجعك للإيقاع بخطوات صغيرة ومن غير أي ضغط.'});
+  var ss=progress.skillStats, worst=null;
+  ['listening','speaking','vocab','grammar'].forEach(function(k){ var v=ss[k]; if(v&&v.total>=10){ var acc=v.ok/v.total; if(acc<0.6&&(!worst||acc<worst.acc)) worst={skill:k,acc:acc}; } });
+  if(worst) out.push({key:'skill', kind:'skill', skill:worst.skill, reason:'مهارة «'+SKILL_NAMES[worst.skill]+'» دقتها '+Math.round(worst.acc*100)+'٪ بس — واقعة شوية ومحتاجة أسبوع تركيز خفيف.'});
+  var sts=SECTIONS.map(function(sec){ return {sec:sec, st:trackStats(sec.id), touch:progress.trackTouch[sec.id]||0}; });
+  var anyAdvance=sts.some(function(x){ return x.st.done>0&&x.touch&&(Date.now()-x.touch)<7*864e5; });
+  var stalled=sts.filter(function(x){ return x.st.done>0&&!x.st.all&&x.touch&&(Date.now()-x.touch)>=7*864e5; });
+  if(stalled.length&&anyAdvance) out.push({key:'stall', kind:'track', sec:stalled[0].sec.id, reason:'تخصص «'+stalled[0].sec.title+'» واقف من '+Math.floor((Date.now()-stalled[0].touch)/864e5)+' أيام بينما تخصصات تانية بتتقدم — نرجّعه للحركة بدروس صغيرة.'});
+  var sc=swCounts();
+  if(sc.total>=10&&sc.hard/sc.total>0.5) out.push({key:'hard', kind:'words', reason:'عندك '+sc.hard+' كلمة لسه صعبة من أصل '+sc.total+' محفوظة (أكتر من النص) — أسبوع مراجعة مركزة هيقلب النسبة لصالحك.'});
+  return out; }
+function swWatchItem(){ var ss=progress.skillStats, low=null;
+  ['listening','speaking','vocab','grammar'].forEach(function(k){ var v=ss[k]; if(v&&v.total>0){ var acc=v.ok/v.total; if(!low||acc<low.acc) low={k:k,acc:acc,total:v.total}; } });
+  if(low) return 'أقرب حاجة للمتابعة: مهارة «'+SKILL_NAMES[low.k]+'» دقتها '+Math.round(low.acc*100)+'٪ من '+low.total+' محاولة — لسه فوق حد الخطر.';
+  var sc=swCounts(); if(sc.total) return 'أقرب حاجة للمتابعة: كلماتك الصعبة '+sc.hard+' من '+sc.total+' — راجعها كل كام يوم ومتخليهاش تتراكم.';
+  return 'أقرب حاجة للمتابعة: ابدأ دروسك وحفظ كلماتك الصعبة، والتحليل هيتكوّن من شغلك الحقيقي.'; }
+function swMetricSnapshot(kind,d){ if(kind==='skill'&&d.skill){ var v=progress.skillStats[d.skill]; return {skill:d.skill, acc:(v&&v.total)? v.ok/v.total : 0}; }
+  if(kind==='words'){ var c=swCounts(); return {hardRatio:c.total? c.hard/c.total : 0}; }
+  if(kind==='track'&&d.sec){ return {sec:d.sec, done:trackStats(d.sec).done}; }
+  return {gapDays:progress.counters.gapDays||0}; }
+function swPlanTasks(kind,d){ var fb=swFeedback(); var weakSec=d.sec||(fb.weakest? fb.weakest.sec.id : 'safety');
+  var nx=trackNextUnit(weakSec);
+  var lessonTask= nx&&nx.unit? {label:'درس في «'+secById(weakSec).title+'» ('+nx.level+'): '+nx.unit.name, act:trackLessonFn(weakSec,nx.unit)} : {label:'افتح تخصص «'+secById(weakSec).title+'» واختر درسًا قصيرًا', act:"goSection('"+weakSec+"')"};
+  var hard=swCounts().hard;
+  var reviewTask={label:'راجع '+(hard? Math.min(10,hard) : 5)+' كلمات من كلماتك الصعبة', act:hard? 'goSavedReview()' : 'goReview()'};
+  var srsTask={label:'جولة مراجعة ذكية (SRS) — عبارات أخطأت فيها قبل كده', act:'goReview()'};
+  var flipTask={label:'جولة بطاقات مفردات في المختبر', act:'goFlip()'};
+  var pronTask={label:'تحدي نطق اليوم في المختبر', act:'goPron()'};
+  var dailyTask={label:'تحدي اليوم (٣ مهام قصيرة)', act:'goDaily()'};
+  var skillTask= d.skill? swSkillNext(d.skill, fb.weakest) : lessonTask;
+  var days=[];
+  for(var i=0;i<7;i++){ var t=[];
+    if(kind==='return'){ t=[lessonTask, i%2? srsTask : reviewTask]; if(i===2||i===5) t.push(dailyTask); }
+    else if(kind==='skill'){ t=[skillTask, i%2? lessonTask : flipTask]; if(i===3) t.push(pronTask); }
+    else if(kind==='track'){ t=[lessonTask, i%2? flipTask : srsTask]; }
+    else { t=[reviewTask, i%2? flipTask : lessonTask]; }
+    days.push({date:swDateStr(i), tasks:t.map(function(x){ return {label:x.label, act:x.act, done:false}; })}); }
+  return days; }
+window.swGenPlan=function(){ var diags=swDiagnose(); if(!diags.length){ try{ toast('مفيش حاجة واقعة دلوقتي 💪 مستواك متوازن'); }catch(e){} if(SW_CUR==='analytics') goAnalytics(); return; }
+  var d=diags[0];
+  progress.remedial={createdTs:Date.now(), reason:d.reason, kind:d.kind, before:swMetricSnapshot(d.kind,d), days:swPlanTasks(d.kind,d), status:'active', verdict:''};
+  swSave(); try{ toast('🩺 خطتك العلاجية جاهزة — ٧ أيام بخطوات صغيرة'); }catch(e){} goAnalytics(); };
+window.swPlanClose=function(){ if(progress.remedial){ progress.remedial.status='closed'; swSave(); } goAnalytics(); };
+function swPlanVerdict(p){ var b=p.before||{};
+  if(p.kind==='skill'&&b.skill){ var v=progress.skillStats[b.skill]; var acc=(v&&v.total)? v.ok/v.total : 0;
+    return acc>=(b.acc||0)+0.05? '📈 اتحسّنت! دقة «'+SKILL_NAMES[b.skill]+'» بقت '+Math.round(acc*100)+'٪ (كانت '+Math.round((b.acc||0)*100)+'٪) — الخطة جابت نتيجة.' : '«'+SKILL_NAMES[b.skill]+'» لسه دقتها '+Math.round(acc*100)+'٪ — محتاجة أسبوع تاني بنفس التركيز. تحب نجدّد الخطة؟'; }
+  if(p.kind==='words'){ var c=swCounts(); var r=c.total? c.hard/c.total : 0;
+    return r<(b.hardRatio||1)? '📈 اتحسّنت! الكلمات الصعبة نزلت من '+Math.round((b.hardRatio||0)*100)+'٪ لـ'+Math.round(r*100)+'٪ من كلماتك المحفوظة.' : 'الكلمات الصعبة لسه نسبتها '+Math.round(r*100)+'٪ — أسبوع مراجعة تاني هيفرق. تحب نجدّد الخطة؟'; }
+  if(p.kind==='track'&&b.sec){ var dn=trackStats(b.sec).done;
+    return dn>(b.done||0)? '📈 اتحسّنت! تقدّمت '+(dn-(b.done||0))+' وحدة في «'+secById(b.sec).title+'» خلال أسبوع الخطة.' : 'تخصص «'+secById(b.sec).title+'» ما اتحركش الأسبوع ده — نجدد الخطة بأهداف أصغر؟'; }
+  var first=p.days&&p.days[0]? p.days[0].date : '0000-00-00';
+  var cnt=(typeof game!=='undefined'&&game.days)? game.days.filter(function(x){ return x>=first; }).length : 0;
+  return cnt>=4? '📈 رجوع موفق! نشطت '+cnt+' أيام خلال أسبوع الخطة — الإيقاع رجع.' : 'نشطت '+cnt+' أيام بس خلال أسبوع الخطة — ولا يهمك خالص، نجدد بخطوات أصغر؟'; }
+function swPlanTick(){ var p=progress.remedial; if(!p||p.status!=='active'||!p.days||!p.days.length) return;
+  var today=todayStr(); var lastDay=p.days[p.days.length-1].date;
+  var allDone=p.days.every(function(dy){ return dy.tasks.every(function(t){ return t.done; }); });
+  if(today>lastDay||allDone){ p.status='done'; p.verdict=swPlanVerdict(p); swSave(); } }
+window.swTaskGo=function(di,ti){ var p=progress.remedial; if(!p||!p.days[di]) return; var t=p.days[di].tasks[ti]; if(t){ try{ (new Function(t.act))(); }catch(e){} } };
+window.swTaskToggle=function(di,ti){ var p=progress.remedial; if(!p||!p.days[di]) return; var t=p.days[di].tasks[ti]; if(!t) return;
+  t.done=!t.done; swSave(); swPlanTick(); if(SW_CUR==='analytics') goAnalytics(); else goHome(); };
+function swPlanDayRows(p,onlyToday){ var today=todayStr();
+  return p.days.map(function(dy,di){ if(onlyToday&&dy.date!==today) return '';
+    var rows=dy.tasks.map(function(t,ti){ return '<div class="sw-taskrow"><button type="button" class="ghost" onclick="swTaskToggle('+di+','+ti+')">'+(t.done?'✅':'⬜')+'</button><button type="button" class="alt" style="flex:1;text-align:right" onclick="swTaskGo('+di+','+ti+')">'+(t.done? '<s>'+esc(t.label)+'</s>' : esc(t.label))+'</button></div>'; }).join('');
+    return '<div style="margin:6px 0"><b>'+(dy.date===today? '📍 النهاردة' : dy.date)+' ('+dy.date+')</b>'+rows+'</div>'; }).join(''); }
+function swRemedialStripHTML(){ var p=progress.remedial; if(!p||p.status!=='active') return ''; var today=todayStr();
+  var has=p.days.some(function(dy){ return dy.date===today; }); if(!has) return '';
+  return '<div class="card" style="border-color:#2e7d32;background:#eef7ee"><h3>🩺 خطتك العلاجية — مهام النهاردة</h3><p class="muted">'+esc(p.reason)+'</p>'+swPlanDayRows(p,true)+'<button type="button" class="ghost" onclick="goAnalytics()">📊 الخطة كاملة في «تحليلي وفيدباك»</button></div>'; }
+function swRemedialHTML(){ swPlanTick(); var p=progress.remedial;
+  if(p&&p.status==='active'){ var doneN=0,totN=0; p.days.forEach(function(dy){ dy.tasks.forEach(function(t){ totN++; if(t.done) doneN++; }); });
+    return '<div class="card" style="border-color:#2e7d32"><h3>🩺 خطتي العلاجية (٧ أيام)</h3><p><b>التشخيص:</b> '+esc(p.reason)+'</p><p>تقدّم الخطة: <b>'+doneN+'/'+totN+'</b> مهمة</p>'+swPlanDayRows(p,false)+'</div>'; }
+  if(p&&p.status==='done'){ return '<div class="card" style="border-color:#c9a227;background:#fffbe8"><h3>🩺 نتيجة خطتك العلاجية</h3><p>'+esc(p.verdict||'')+'</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="big" onclick="swGenPlan()">🔄 خطة جديدة</button><button class="ghost" onclick="swPlanClose()">خلاص، تمام</button></div></div>'; }
+  var diags=swDiagnose();
+  if(diags.length){ return '<div class="card" style="border-color:#c9a227;background:#fffbe8"><h3>🩺 خطة علاجية</h3><p><b>التشخيص:</b> '+esc(diags[0].reason)+'</p><p class="muted">أرسم لك خطة ٧ أيام — مهمتين أو تلاتة في اليوم (حوالي ١٥ دقيقة) بيستهدفوا النقطة دي بالذات من محتوى التطبيق نفسه.</p><button class="big" onclick="swGenPlan()">🩺 ارسم خطتي العلاجية</button></div>'; }
+  return '<div class="card"><h3>🩺 خطة علاجية</h3><p>مفيش حاجة واقعة دلوقتي — مستواك متوازن 💪</p><p class="muted">'+esc(swWatchItem())+'</p></div>'; }
+
+/* ---------- شاشة التحليل ---------- */
+window.goAnalytics=function(){ SW_CUR='analytics'; swPlanTick();
+  var fb=swFeedback(); var c=swCounts();
+  var srsA=(typeof srs!=='undefined'&&srs)? srs : [];
+  var mature=srsA.filter(function(x){ return x.box>=3; }).length;
+  var dueN=0; try{ dueN=srsDue().length; }catch(e){}
+  var weekDays=0,totalDays=0,xp=0,st=0; try{ var sd7=swDateStr(-6); weekDays=game.days.filter(function(x){ return x>=sd7; }).length; totalDays=game.days.length; xp=game.xp||0; st=streak(); }catch(e){}
+  var trackRows=fb.sts.map(function(x){ return '<div>• '+esc(x.sec.title)+': <b>'+x.st.done+'/'+x.st.total+'</b> وحدة ('+x.st.pct+'٪) — مستواك الحالي فيه '+x.st.cur+'</div>'; }).join('');
+  var ss=progress.skillStats;
+  var skillRows=['listening','speaking','vocab','grammar'].map(function(k){ var v=ss[k]; if(!v||!v.total) return '<div>• '+SKILL_NAMES[k]+': لسه مفيش محاولات مسجلة</div>';
+    return '<div>• '+SKILL_NAMES[k]+': <b>'+v.ok+'/'+v.total+'</b> صح ('+Math.round(100*v.ok/v.total)+'٪)</div>'; }).join('');
+  var anySkill=Object.keys(ss).some(function(k){ return ss[k]&&ss[k].total>=10; });
+  var strongTxt= fb.bestSkill? 'مهارة «'+SKILL_NAMES[fb.bestSkill.k]+'» ('+Math.round(fb.bestSkill.acc*100)+'٪)' : (fb.strongest? 'تخصص «'+fb.strongest.sec.title+'» ('+fb.strongest.st.pct+'٪ من وحداته)' : 'لسه في أول الطريق — كمّل دروسك وهتظهر قوتك هنا');
+  var focusTxt= fb.focused? 'تخصص «'+fb.focused.sec.title+'» — أنجزت فيه '+fb.focused.st.done+' وحدة، وهو أكتر تخصص اشتغلت عليه' : 'لسه مفيش تخصص بدأت فيه بجد';
+  var weakTxt= (fb.worstSkill&&fb.worstSkill.acc<0.6)? 'مهارة «'+SKILL_NAMES[fb.worstSkill.k]+'» دقتها '+Math.round(fb.worstSkill.acc*100)+'٪' : (fb.weakest? 'تخصص «'+fb.weakest.sec.title+'» — لسه عند '+fb.weakest.st.pct+'٪ بس' : 'مفيش نقطة ضعف واضحة في بياناتك لحد دلوقتي');
+  $app.innerHTML='<button class="alt" onclick="goHome()">⬅ الرئيسية</button><h2>📊 تحليلي وفيدباك</h2>'
+    + swReportHTML()
+    + '<div class="card"><h3>🗣️ فيدباك صريح من شغلك الحقيقي</h3>'
+    + '<p>💪 <b>أقوى حاجة عندك:</b> '+esc(strongTxt)+'</p>'
+    + '<p>🎯 <b>أكتر حاجة بتركز فيها:</b> '+esc(focusTxt)+'</p>'
+    + '<p>🩹 <b>نقطة ضعف محتاجة شغل:</b> '+esc(weakTxt)+'</p>'
+    + '<p>➡️ <b>تركيزك الجاي:</b> '+esc(fb.next.label)+'</p>'
+    + '<button class="big" onclick="swGoNext()">ابدأ التركيز الجاي ←</button></div>'
+    + '<div class="card"><h3>📚 تخصصاتك</h3>'+trackRows+'</div>'
+    + '<div class="card"><h3>⭐ كلماتك ومفرداتك</h3><p>كلمات محفوظة: <b>'+c.total+'</b> (أتقنت '+c.known+' · لسه صعبة '+c.hard+')<br>عبارات أتقنها التطبيق بالنطق: <b>'+c.mastered+'</b><br>مراجعة ذكية (SRS): <b>'+srsA.length+'</b> عنصر — ناضجة (خرجت من المراجعة): <b>'+mature+'</b> · لسه بتتعلّم: <b>'+(srsA.length-mature)+'</b> · مستحقة النهاردة: <b>'+dueN+'</b></p><button class="alt" onclick="goSavedWords()">⭐ افتح كلماتي المحفوظة</button></div>'
+    + '<div class="card"><h3>🎯 مهاراتك (من إجاباتك الفعلية)</h3>'+skillRows+(anySkill? '' : '<p class="muted">إحصائيات المهارة بتتجمع من النهاردة — أكمل ١٠ محاولات في أي مهارة وهتظهر هنا أقوى وأضعف مهارة عندك بدقة.</p>')+'</div>'
+    + '<div class="card"><h3>📈 نشاطك</h3><p>أيام نشاط الأسبوع ده: <b>'+weekDays+'</b> · كل أيام نشاطك: <b>'+totalDays+'</b> · سلسلة الأيام: <b>'+st+'</b> 🔥 · نقاط الخبرة: <b>'+xp+'</b> ⭐</p></div>'
+    + swRemedialHTML();
+  window.scrollTo(0,0); };
+
+/* ---------- حقن الرئيسية وربط الخطة اليومية ---------- */
+function swHomeInject(){ var main=document.querySelector('#app .desk2-main'); if(!main||document.getElementById('swHomeBox')) return;
+  var c=swCounts(); var html='';
+  var p=progress.remedial;
+  if((progress.counters.gapDays||0)>=3&&!(p&&p.status==='active'))
+    html+='<div class="card" style="border-color:#a67c00;background:#fff6da"><h3>👋 وحشتنا!</h3><p>بقالك '+progress.counters.gapDays+' أيام غايب — ولا يهمك خالص، الرجوع سهل وخطواته صغيرة. عندك خطة رجوع جاهزة في صفحة التحليل.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="big" onclick="goAnalytics()">🩺 شوف خطة الرجوع</button><button class="ghost" onclick="swDismissGap()">✕ إخفاء</button></div></div>';
+  if(Date.now()-(progress.counters.lastReportTs||0)>=7*864e5) html+=swReportHTML();
+  html+='<div class="card"><h3>⭐ كلماتي المحفوظة وتحليلي</h3><p>📚 كلمات محفوظة: <b>'+c.total+'</b> · ✅ أتقنتها: <b>'+c.known+'</b> · 🔥 لسه صعبة: <b>'+c.hard+'</b><br>🏆 عبارات أتقنها التطبيق (بالنطق): <b>'+c.mastered+'</b></p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="big" onclick="goSavedWords()">⭐ افتح كلماتي المحفوظة</button><button class="alt" onclick="goJourney()">🪜 سلّم رحلتي</button><button class="alt" onclick="goAnalytics()">📊 تحليلي وفيدباك</button></div></div>';
+  var box=document.createElement('div'); box.id='swHomeBox'; box.innerHTML=html; main.insertBefore(box,main.firstChild); }
+
+/* ---------- أدوات الربط (wrapping) دون لمس الأصل ---------- */
+function swAfter(name,fn){ try{ if(typeof window[name]==='function'){ var o=window[name]; window[name]=function(){ var r=o.apply(this,arguments); try{ fn(o,arguments); }catch(e){} return r; }; } }catch(e){} }
+function swStat(skill,ok){ try{ var v=progress.skillStats[skill]; if(!v) return; v.total++; if(ok) v.ok++; swSave(); }catch(e){} }
+
+function swInstall(){
+  /* سياق الحفظ: آخر تخصص/مستوى فُتح */
+  swAfter('goSection',function(o,a){ SWCTX={track:a[0]||'',level:'',src:''}; });
+  swAfter('goScene',function(o,a){ SWCTX={track:a[0]||SWCTX.track,level:'',src:''}; });
+  swAfter('goGrammar',function(o,a){ SWCTX={track:a[0]||'',level:a[1]||'',src:''}; });
+  swAfter('goGlossary',function(o,a){ SWCTX={track:a[0]||'',level:'',src:'ملخص مصطلحات'}; swInjectGlossStars(a[0]); });
+  swAfter('flipRender',function(){ swInjectFlipStar(); });
+  /* إحصائيات المهارات من نقاط التحقق الحقيقية */
+  var compMark=null;
+  try{ if(typeof window.answerComp==='function'){ var _ac=window.answerComp; window.answerComp=function(e){ var counted=false,ok=false;
+    try{ if(typeof compState!=='undefined'&&compState&&compState.qs){ if(!compMark||compMark.st!==compState||compMark.qi!==compState.qi){ compMark={st:compState,qi:compState.qi}; counted=true; ok=(e===compState.qs[compState.qi][2]); } } }catch(err){}
+    var r=_ac.apply(this,arguments); if(counted) swStat('listening',ok); return r; }; } }catch(e){}
+  try{ if(typeof window.answerChallenge==='function'){ var _ach=window.answerChallenge; window.answerChallenge=function(e){ var counted=false,ok=false;
+    try{ if(typeof chState!=='undefined'&&chState&&!chState.answered){ counted=true; ok=(e===chState.items[chState.i].correct); } }catch(err){}
+    var r=_ach.apply(this,arguments); if(counted) swStat('listening',ok); return r; }; } }catch(e){}
+  try{ if(typeof window.grPick==='function'){ var _gp=window.grPick; window.grPick=function(i,j){ var counted=false,ok=false;
+    try{ if(typeof grState!=='undefined'&&grState&&grState.ans&&grState.ans[i]==null){ counted=true; ok=(j===grState.g.practice[i].correct); } }catch(err){}
+    var r=_gp.apply(this,arguments); if(counted) swStat('grammar',ok); return r; }; } }catch(e){}
+  swAfter('shadowJudge',function(o,a){ swStat('speaking',!!a[0]); });
+  swAfter('advJudge',function(o,a){ swStat('speaking',!!a[0]); });
+  swAfter('pronSelf',function(){ swStat('speaking',true); });
+  swAfter('flipKnow',function(o,a){ swStat('vocab',!!a[0]); });
+  try{ if(typeof window.checkWords==='function'){ var _cw=window.checkWords; window.checkWords=function(){ var sz=-1;
+    try{ if(typeof speakState!=='undefined'&&speakState&&speakState.passed) sz=speakState.passed.size; }catch(err){}
+    var r=_cw.apply(this,arguments); var ok=false; try{ ok=(sz>=0&&speakState.passed.size>sz); }catch(err){} swStat('speaking',ok); return r; }; } }catch(e){}
+  /* إنجازات + لمس التخصصات عند إتمام الوحدات */
+  swAfter('addMastered',function(){ swCheckMilestones(); });
+  try{ if(typeof window.completeUnit==='function'){ var _cu=window.completeUnit; window.completeUnit=function(id,xp){ var r=_cu.apply(this,arguments);
+    try{ if(r){ for(var si=0;si<SECTIONS.length;si++){ for(var li=0;li<LEVELS.length;li++){ var us=trackUnitsFor(SECTIONS[si].id,LEVELS[li]); for(var ui=0;ui<us.length;ui++) if(us[ui].id===id){ progress.trackTouch[SECTIONS[si].id]=Date.now(); } } } swSave(); } }catch(err){}
+    return r; }; } }catch(e){}
+  /* الرئيسية + خطة اليوم */
+  swAfter('goHome',function(){ SW_CUR='home'; swPlanTick(); swHomeInject(); swCheckMilestones(); });
+  try{ if(typeof window.planHTML==='function'){ var _ph=window.planHTML; window.planHTML=function(){ var h=_ph.apply(this,arguments); try{ swPlanTick(); h+=swRemedialStripHTML(); }catch(e){} return h; }; } }catch(e){}
+  /* مراقبة نافذة القاموس */
+  try{ var mo=new MutationObserver(function(){ var p=document.getElementById('fsPop'); if(p) swPopBtn(p); }); mo.observe(document.body,{childList:true}); }catch(e){}
+}
+
+try{ if(swInit()){ swInstall(); try{ if(document.querySelector('#app .desk2-main')){ swPlanTick(); swHomeInject(); } }catch(e){} } }catch(e){}
+})();
+</script>
+
 </body>
 </html>
