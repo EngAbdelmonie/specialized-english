@@ -833,5 +833,134 @@ try{ if(swInit()){ swInstall(); try{ if(document.querySelector('#app .desk2-main
 })();
 </script>
 
+<script>
+// ===== تحديث التطبيق بضغطة واحدة (v10) — زر «🔄 تحديث الآن» + كشف سلبي للنسخ الجديدة =====
+(function(){
+'use strict';
+var RELOAD_FLAG='espUpdReloading', DONE_FLAG='espUpdDone';
+var reg=null, updateReady=false, updating=false, reloading=false, banner=null;
+
+function say(html){ try{ if(typeof toast==='function'){ toast(html); return; } }catch(e){}
+  var t=document.createElement('div'); t.className='toast'; t.innerHTML=html; document.body.appendChild(t);
+  setTimeout(function(){ t.classList.add('show'); },30);
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },400); },2600); }
+
+function guardedReload(){
+  if(reloading) return;
+  try{ if(sessionStorage.getItem(RELOAD_FLAG)) return; sessionStorage.setItem(RELOAD_FLAG,'1'); sessionStorage.setItem(DONE_FLAG,'1'); }catch(e){}
+  reloading=true; location.reload();
+}
+
+/* عند بدء التطبيق: لو رجعنا من تحديث ناجح، رحّب مرة واحدة ونظّف الأعلام */
+try{
+  if(sessionStorage.getItem(DONE_FLAG)){ sessionStorage.removeItem(DONE_FLAG); sessionStorage.removeItem(RELOAD_FLAG);
+    setTimeout(function(){ say('تم التحديث لأحدث نسخة ✓'); },900);
+  } else { sessionStorage.removeItem(RELOAD_FLAG); }
+}catch(e){}
+
+function showBanner(){
+  if(banner||document.getElementById('espUpdBanner')) return;
+  banner=document.createElement('div'); banner.id='espUpdBanner'; banner.setAttribute('dir','rtl');
+  banner.style.cssText='position:fixed;top:0;right:0;left:0;z-index:10001;background:#0b7a3e;color:#fff;padding:10px 14px;box-shadow:0 3px 14px rgba(0,0,0,.3);display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+  banner.innerHTML='<span style="flex:1;min-width:170px;font-size:19px">✨ فيه نسخة جديدة جاهزة</span>'
+    +'<button type="button" style="background:#ffc21f;color:#0b3d66;border:2px solid #ffc21f;font-weight:bold" onclick="espDoUpdate()">🔄 حدّث الآن</button>'
+    +'<button type="button" aria-label="إغلاق" style="background:transparent;color:#fff;border:2px solid #9fd8b4;padding:6px 12px" onclick="espUpdHideBanner()">✕</button>';
+  document.body.appendChild(banner);
+}
+window.espUpdHideBanner=function(){ if(banner){ if(banner.parentNode) banner.parentNode.removeChild(banner); banner=null; } };
+
+function markReady(){ updateReady=true; showBanner(); }
+
+function trackWorker(w){
+  if(!w) return;
+  w.addEventListener('statechange',function(){
+    if(w.state==='installed' && navigator.serviceWorker.controller) markReady();
+    else if(w.state==='activated' && navigator.serviceWorker.controller) updateReady=true;
+  });
+}
+
+function applyWorker(w){
+  try{ w.postMessage({type:'SKIP_WAITING'}); }catch(e){}
+  var tries=0;
+  var iv=setInterval(function(){
+    tries++;
+    if(reloading){ clearInterval(iv); return; }
+    if(w.state==='activated'||w.state==='activating'){ clearInterval(iv); guardedReload(); }
+    else if(w.state==='redundant'){ clearInterval(iv); updating=false; say('التحديث ما كمّلش — جرّب تاني'); }
+    else if(tries>15){ clearInterval(iv); updating=false; say('التحديث بياخد وقت — جرّب تاني كمان شوية'); }
+  },700);
+}
+
+if('serviceWorker' in navigator){
+  var hadController=!!navigator.serviceWorker.controller; /* وجود متحكّم عند الفتح = التطبيق مثبّت أصلًا؛ بدونه فأول controllerchange مجرد تفعيل أول تثبيت لا تحديث */
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(updating) guardedReload();
+    else if(hadController) updateReady=true;
+  });
+}
+
+window.espDoUpdate=function(){
+  window.espUpdHideBanner();
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){ location.reload(); return; }
+  if(updateReady){ updating=true; guardedReload(); return; }
+  if(updating) return;
+  updating=true;
+  say('🔄 بندوّر على تحديث…');
+  navigator.serviceWorker.getRegistration().then(function(r){
+    if(!r){ updating=false; location.reload(); return; }
+    reg=r;
+    if(r.waiting){ applyWorker(r.waiting); return; }
+    var foundNew=false, applied=false;
+    function watchNew(w){ if(!w) return; w.addEventListener('statechange',function(){
+      if(!applied && (w.state==='installed'||w.state==='activating'||w.state==='activated')){ applied=true; applyWorker(w); } }); }
+    function onFound(){ foundNew=true; watchNew(r.installing); }
+    r.addEventListener('updatefound',onFound);
+    r.update().then(function(){
+      setTimeout(function(){
+        r.removeEventListener('updatefound',onFound);
+        if(applied) return;
+        if(r.waiting){ applied=true; applyWorker(r.waiting); return; }
+        if(r.installing){ watchNew(r.installing); return; }
+        if(!foundNew){ updating=false; say('أنت على أحدث نسخة ✓'); }
+      },800);
+    }).catch(function(){ updating=false; say('أنت على أحدث نسخة ✓'); });
+  }).catch(function(){ updating=false; location.reload(); });
+};
+
+/* كشف سلبي عند كل فتح: فحص تحديث + مراقبة أي عامل جديد — بلا إعادة تحميل تلقائية أبدًا */
+function passiveCheck(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.getRegistration().then(function(r){
+    if(!r) return; reg=r;
+    if(r.waiting && navigator.serviceWorker.controller) markReady();
+    r.addEventListener('updatefound',function(){ trackWorker(r.installing); });
+    if(r.installing) trackWorker(r.installing);
+    r.update().catch(function(){});
+  }).catch(function(){});
+}
+if(document.readyState==='complete') passiveCheck(); else window.addEventListener('load',passiveCheck);
+
+/* زر التحديث: في أعلى الرئيسية + داخل بطاقة «استوديو الصوت» — نفس الإجراء */
+function injectBtn(){
+  try{
+    var main=document.querySelector('#app .desk2-main')||document.getElementById('app');
+    if(main && !document.getElementById('espUpdRow')){
+      var row=document.createElement('div'); row.id='espUpdRow'; row.className='card';
+      row.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="flex:1;min-width:180px"><b>🔄 تحديث التطبيق</b><br><span class="muted">اضغط الزر وهيوصلك أحدث نسخة فورًا — تقدّمك ومفتاحك محفوظين زي ما هما.</span></span><button type="button" class="big" onclick="espDoUpdate()">🔄 تحديث الآن</button></div>';
+      main.insertBefore(row,main.firstChild);
+    }
+    var vs=document.querySelector('.voiceset');
+    if(vs && !document.getElementById('espUpdBtn2')){
+      var b=document.createElement('button'); b.id='espUpdBtn2'; b.type='button'; b.className='alt'; b.textContent='🔄 تحديث التطبيق لأحدث نسخة'; b.style.marginTop='10px';
+      b.addEventListener('click',function(){ window.espDoUpdate(); });
+      vs.appendChild(b);
+    }
+  }catch(e){}
+}
+try{ if(typeof window.goHome==='function'){ var _ghU=window.goHome; window.goHome=function(){ var r=_ghU.apply(this,arguments); injectBtn(); return r; }; } }catch(e){}
+injectBtn();
+})();
+</script>
+
 </body>
 </html>
